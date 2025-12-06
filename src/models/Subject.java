@@ -2,6 +2,8 @@
 
 // Base class representing a subject with common attributes and methods
 //  Serves as a foundation for core and elective subjects
+package models;
+
 public abstract class Subject {
     protected String subjectName;
     protected String subjectCode;
