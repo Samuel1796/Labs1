@@ -3,7 +3,7 @@
 
 // Represents a student's grade record with all relevant data
 //  Includes grade ID, student ID, subject details, numeric value, and date
-
+package models;
 import java.util.Date;
 
 public class Grade {

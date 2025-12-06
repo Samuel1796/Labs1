@@ -1,0 +1,19 @@
+GRADE REPORT SUMMARY
+====================
+Student: STU003 - John Cena
+Type: Regular Student
+Total Grades: 3
+Average: 50.0%
+Status: PASSING
+
+GRADE HISTORY
+=============
+GRD ID   DATE         SUBJECT         TYPE            GRADE   
+GRD007   06-12-2025   Science         Core Subject    40.0    
+GRD008   06-12-2025   Art             Elective Subject 50.0    
+GRD009   06-12-2025   Physical Education Elective Subject 60.0    
+
+Performance Summary:
+Passing all Core subjects
+Meeting passing grade requirement (50%)
+Regular Student - standard grading (passing grade: 50%)

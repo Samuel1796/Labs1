@@ -1,0 +1,12 @@
+GRADE REPORT SUMMARY
+====================
+Student: STU004 - Afia Oduro
+Type: Honors Student
+Total Grades: 3
+Average: 87.7%
+Status: PASSING
+
+Performance Summary:
+Passing all Core subjects
+Meeting passing grade requirement (60%)
+Honors Student - higher standards (passing grade: 60%, eligible for honors recognition)

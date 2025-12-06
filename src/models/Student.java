@@ -1,6 +1,8 @@
 // Student.java
 // Base class representing a student with personal info, grades, and subjects
 //  Contains core student management functionality
+
+package models;
 public abstract class Student {
     protected String studentID;
     protected String name;
