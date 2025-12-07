@@ -7,8 +7,11 @@ import models.Grade;
 import models.Subject;
 import models.CoreSubject;
 import models.ElectiveSubject;
+import exceptions.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -42,7 +45,7 @@ public class StudentService {
 
     public boolean addStudent(Student student) {
         if (studentCount >= students.length) {
-            return false;
+            throw new AppExceptions("Student database full!");
         }
         students[studentCount++] = student;
         return true;
@@ -55,7 +58,45 @@ public class StudentService {
                 return students[i];
             }
         }
-        return null;
+        throw new StudentNotFoundException(studentID);
+    }
+
+    // Search by partial/full name
+    public Student[] searchStudentsByName(String namePart) {
+        List<Student> results = new ArrayList<>();
+        for (int i = 0; i < studentCount; i++) {
+            Student s = students[i];
+            if (s.getName().toLowerCase().contains(namePart.toLowerCase())) {
+                results.add(s);
+            }
+        }
+        return results.toArray(new Student[0]);
+    }
+
+
+    // Search by grade range
+    public Student[] searchStudentsByGradeRange(double min, double max, GradeService gradeService) {
+        List<Student> results = new ArrayList<>();
+        for (int i = 0; i < studentCount; i++) {
+            Student s = students[i];
+            double avg = s.calculateAverage(gradeService);
+            if (avg >= min && avg <= max) {
+                results.add(s);
+            }
+        }
+        return results.toArray(new Student[0]);
+    }
+
+    // Search by student type
+    public Student[] searchStudentsByType(boolean honors) {
+        List<Student> results = new ArrayList<>();
+        for (int i = 0; i < studentCount; i++) {
+            Student s = students[i];
+            if ((honors && s instanceof HonorsStudent) || (!honors && s instanceof RegularStudent)) {
+                results.add(s);
+            }
+        }
+        return results.toArray(new Student[0]);
     }
 
     public Subject findSubjectByNameAndType(String name, String type) {

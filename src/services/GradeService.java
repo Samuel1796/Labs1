@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import models.Subject;
+import exceptions.*;
 
 
 //Needed for the file writing
@@ -31,7 +32,7 @@ public class GradeService {
 
     public boolean recordGrade(Grade grade) {
         if (gradeCount >= grades.length) {
-            return false;
+            throw new AppExceptions("Grade database full!");
         }
         grades[gradeCount++] = grade;
         return true;
@@ -214,7 +215,6 @@ public class GradeService {
             // Skip the header row
             String header = br.readLine();
 
-
             String line;
             int rowNum = 2;
             while ((line = br.readLine()) != null) {
@@ -231,10 +231,12 @@ public class GradeService {
                 String subjectType = parts[2].trim();
                 String gradeStr = parts[3].trim();
     
-                Student student = studentService.findStudentById(studentId);
-                if (student == null) {
+                Student student;
+                try {
+                    student = studentService.findStudentById(studentId);
+                } catch (StudentNotFoundException e) {
                     failCount++;
-                    failedRecords.add("ROW " + rowNum + ": Invalid student ID (" + studentId + ")");
+                    failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
                     rowNum++;
                     continue;
                 }
@@ -251,11 +253,11 @@ public class GradeService {
                 try {
                     gradeValue = Integer.parseInt(gradeStr);
                     if (gradeValue < 0 || gradeValue > 100) {
-                        throw new NumberFormatException();
+                        throw new InvalidGradeException(gradeValue);
                     }
-                } catch (NumberFormatException e) {
+                } catch (Exception e) {
                     failCount++;
-                    failedRecords.add("ROW " + rowNum + ": Grade out of range (" + gradeStr + ")");
+                    failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
                     rowNum++;
                     continue;
                 }
