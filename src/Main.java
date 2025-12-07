@@ -30,6 +30,15 @@ public class Main {
         studentService.setStudentCount(studentCountRef[0]);
         gradeService.setGradeCount(gradeCountRef[0]);
 
+
+        StatisticsService statisticsService = new StatisticsService(
+                gradeService.getGrades(),
+                gradeService.getGradeCount(),
+                studentService.getStudents(),
+                studentService.getStudentCount(),
+                gradeService
+        );
+
         Scanner sc = new Scanner(System.in);
         boolean running = true;
 
@@ -243,6 +252,32 @@ public class Main {
                             System.out.printf("Contains: %d grades, averages, performance summary%n", gradeService.countGradesForStudent(exportStudent));
                         } catch (Exception e) {
                             System.out.println("Export failed: " + e.getMessage());
+                        }
+                        break;
+
+                    case 6:
+                        // CALCULATE STUDENT GPA
+                        System.out.println("CALCULATE STUDENT GPA");
+                        System.out.println("_____________________________");
+                        Student gpaStudent = null;
+                        boolean foundGPA = false;
+                        while (!foundGPA) {
+                            System.out.print("Enter Student ID: ");
+                            String gpaId = sc.nextLine().trim();
+                            try {
+                                gpaStudent = studentService.findStudentById(gpaId);
+                                foundGPA = true;
+                            } catch (StudentNotFoundException e) {
+                                System.out.println("Error: " + e.getMessage());
+                                System.out.print("Try again? (Y/N): ");
+                                String retry = sc.nextLine().trim();
+                                if (!retry.equalsIgnoreCase("Y")) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (gpaStudent != null) {
+                            statisticsService.printStudentGPAReport(gpaStudent);
                         }
                         break;
 
