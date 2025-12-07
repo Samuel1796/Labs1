@@ -217,4 +217,94 @@ public class StatisticsService {
             System.out.printf("%-20s: %.2f%% average\n", entry.getKey(), entry.getValue());
         }
     }
+
+
+
+    /**
+     * Prints a detailed GPA report for a student.
+     */
+    public void printStudentGPAReport(Student student) {
+        Grade[] grades = gradeService.getGrades();
+        int gradeCount = gradeService.getGradeCount();
+        double total = 0.0;
+        int count = 0;
+        double gpaSum = 0.0;
+        int gpaCount = 0;
+        List<String> subjects = new ArrayList<>();
+        List<String> gradeStrings = new ArrayList<>();
+        List<String> gpaStrings = new ArrayList<>();
+        List<String> letterGrades = new ArrayList<>();
+
+        // GPA scale: 90-100 = 4.0 (A), 80-89 = 3.7 (A-), 75-79 = 3.3 (B+), 70-74 = 3.0 (B), 65-69 = 2.7 (B-), 60-64 = 2.3 (C+), 50-59 = 2.0 (C), <50 = 0.0 (F)
+        for (int i = 0; i < gradeCount; i++) {
+            Grade g = grades[i];
+            if (g != null && g.getStudentID().equalsIgnoreCase(student.getStudentID())) {
+                subjects.add(g.getSubjectName());
+                gradeStrings.add(g.getValue() + "%");
+                double gpa = convertToGPA(g.getValue());
+                gpaStrings.add(String.format("%.1f", gpa));
+                letterGrades.add(getLetterGrade(g.getValue()));
+                gpaSum += gpa;
+                gpaCount++;
+                total += g.getValue();
+                count++;
+            }
+        }
+
+        double average = count > 0 ? total / count : 0.0;
+        double cumulativeGPA = gpaCount > 0 ? gpaSum / gpaCount : 0.0;
+
+        System.out.printf("Student: %s - %s%n", student.getStudentID(), student.getName());
+        System.out.printf("Type: %s%n", (student instanceof models.HonorsStudent) ? "Honors Student" : "Regular Student");
+        System.out.printf("Overall Average: %.1f%%%n", average);
+        System.out.println("GPA CALCULATION (4.0 Scale)");
+        System.out.println(String.format("%-15s %-8s %-8s %-10s", "Subject", "Grade", "GPA", "Points"));
+        for (int i = 0; i < subjects.size(); i++) {
+            System.out.println(String.format("%-15s %-8s %-8s %-10s", subjects.get(i), gradeStrings.get(i), gpaStrings.get(i), "(" + letterGrades.get(i) + ")"));
+        }
+        System.out.printf("Cumulative GPA: %.2f / 4.0%n", cumulativeGPA);
+        System.out.printf("Letter Grade: %s%n", getLetterGrade(average));
+        // Class rank and performance analysis can be added if you have class-wide GPA data
+        System.out.println("Performance Analysis:");
+        if (cumulativeGPA >= 3.5) {
+            System.out.println("Excellent performance (3.5+ GPA)");
+            if (student instanceof models.HonorsStudent) {
+                System.out.println("Honors eligibility maintained");
+            }
+        } else if (cumulativeGPA >= 3.0) {
+            System.out.println("Above average performance (3.0+ GPA)");
+        } else if (cumulativeGPA >= 2.0) {
+            System.out.println("Satisfactory performance (2.0+ GPA)");
+        } else {
+            System.out.println("Needs improvement (<2.0 GPA)");
+        }
+    }
+
+    private double convertToGPA(double grade) {
+        if (grade >= 93) return 4.0;
+        if (grade >= 90) return 3.7;
+        if (grade >= 87) return 3.3;
+        if (grade >= 83) return 3.0;
+        if (grade >= 80) return 2.7;
+        if (grade >= 77) return 2.3;
+        if (grade >= 73) return 2.0;
+        if (grade >= 70) return 1.7;
+        if (grade >= 67) return 1.3;
+        if (grade >= 60) return 1.0;
+        return 0.0;
+    }
+
+    private String getLetterGrade(double grade) {
+        if (grade >= 93) return "A";
+        if (grade >= 90) return "A-";
+        if (grade >= 87) return "B+";
+        if (grade >= 83) return "B";
+        if (grade >= 80) return "B-";
+        if (grade >= 77) return "C+";
+        if (grade >= 73) return "C";
+        if (grade >= 70) return "C-";
+        if (grade >= 67) return "D+";
+        if (grade >= 60) return "D";
+        return "F";
+    }
 }
