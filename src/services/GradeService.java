@@ -13,12 +13,6 @@ import exceptions.*;
 
 //Needed for the file writing
 
-//Exception
-class DuplicateGradeException extends Exception {
-    public DuplicateGradeException(String message) {
-        super(message);
-    }
-}
 
 
 public class GradeService {
@@ -127,7 +121,7 @@ public class GradeService {
         }
     }
 
-    // Additional methods for export, GPA, bulk import, statistics, etc. can be added here.
+    // Additional methods for export, GPA, bulk import, statistics
 
     public int countGradesForStudent(Student student) {
         int count = 0;
@@ -195,6 +189,7 @@ public class GradeService {
 
 
     public void bulkImportGrades(String filename, StudentService studentService) {
+        // Build file path for import
         String dirPath = "./imports/";
         String filePath = dirPath + filename + ".csv";
         File file = new File(filePath);
@@ -214,13 +209,15 @@ public class GradeService {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             // Skip the header row
             String header = br.readLine();
-
+    
             String line;
             int rowNum = 2;
+            // Read each line and process grade import
             while ((line = br.readLine()) != null) {
                 totalRows++;
                 String[] parts = line.split(",");
                 if (parts.length != 4) {
+                    // Handles invalid CSV format
                     failCount++;
                     failedRecords.add("ROW " + rowNum + ": Invalid format");
                     rowNum++;
@@ -233,6 +230,7 @@ public class GradeService {
     
                 Student student;
                 try {
+                    // Find student by ID, throws exception if not found
                     student = studentService.findStudentById(studentId);
                 } catch (StudentNotFoundException e) {
                     failCount++;
@@ -243,6 +241,7 @@ public class GradeService {
     
                 Subject subject = studentService.findSubjectByNameAndType(subjectName, subjectType);
                 if (subject == null) {
+                    // Handles invalid subject scenario
                     failCount++;
                     failedRecords.add("ROW " + rowNum + ": Invalid subject (" + subjectName + ", " + subjectType + ")");
                     rowNum++;
@@ -256,12 +255,14 @@ public class GradeService {
                         throw new InvalidGradeException(gradeValue);
                     }
                 } catch (Exception e) {
+                    // Handles invalid grade value
                     failCount++;
                     failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
                     rowNum++;
                     continue;
                 }
     
+                // Check for duplicate grade and prompt user for overwrite
                 if (isDuplicateGrade(studentId, subjectName, subjectType)) {
                     System.out.printf("ROW %d: Duplicate grade found for student %s and subject %s (%s). Overwrite with new value? [Y/N]: ", rowNum, studentId, subjectName, subjectType);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -275,6 +276,7 @@ public class GradeService {
                         failedRecords.add("ROW " + rowNum + ": Duplicate grade not updated.");
                     }
                 } else {
+                    // Record new grade if not duplicate
                     Grade grade = new Grade(
                             "GRD0" + (getGradeCount() + 1),
                             studentId,
@@ -293,7 +295,7 @@ public class GradeService {
             return;
         }
     
-        // Import summary
+        // Print import summary
         System.out.println("IMPORT SUMMARY");
         System.out.println("Total Rows: " + totalRows);
         System.out.println("Successfully Imported: " + successCount);
@@ -333,9 +335,9 @@ public class GradeService {
         for (int i = 0; i < gradeCount; i++) {
             Grade g = grades[i];
             if (g != null &&
-                g.getStudentID().equalsIgnoreCase(studentId) &&
-                g.getSubjectName().equalsIgnoreCase(subjectName) &&
-                g.getSubjectType().equalsIgnoreCase(subjectType)) {
+                    g.getStudentID().equalsIgnoreCase(studentId) &&
+                    g.getSubjectName().equalsIgnoreCase(subjectName) &&
+                    g.getSubjectType().equalsIgnoreCase(subjectType)) {
                 g.setValue(newValue);
                 g.setDate(new java.util.Date()); // Optionally update the date to now
                 break;

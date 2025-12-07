@@ -15,6 +15,8 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        // Initialize services
+
         StudentService studentService = new StudentService(50);
         GradeService gradeService = new GradeService(500);
         MenuService menuService = new MenuService();
@@ -42,6 +44,8 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         boolean running = true;
 
+        // Main program loop
+
         while (running) {
             menuService.displayMainMenu();
             int choice = sc.nextInt();
@@ -51,34 +55,88 @@ public class Main {
                 switch (choice) {
                     case 1:
                         // Add Student
-                        System.out.print("Enter student name: ");
-                        String name = sc.nextLine();
-                        System.out.print("Enter student age: ");
-                        int age = sc.nextInt();
-                        sc.nextLine();
-                        String email;
-                        while (true) {
-                            System.out.print("Enter student email: ");
-                            email = sc.nextLine();
-                            if (studentService.isValidEmail(email)) break;
-                            System.out.println("Invalid email format. Try again.");
+                        boolean studentAdded = false;
+                        while (!studentAdded) {
+                            try {
+                                System.out.print("Enter student name: ");
+                                String name = sc.nextLine();
+                            
+                                // Age input with InputMismatchException handling
+                                int age = -1;
+                                while (age < 0) {
+                                    System.out.print("Enter student age: ");
+                                    String ageInput = sc.nextLine();
+                                    try {
+                                        age = Integer.parseInt(ageInput);
+                                        if (age < 0) {
+                                            System.out.println("Age must be a positive integer.");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Invalid input. Please enter a valid integer for age.");
+                                    }
+                                }
+
+                                // Email input with format validation
+                                String email;
+                                while (true) {
+                                    System.out.print("Enter student email: ");
+                                    email = sc.nextLine();
+                                    if (studentService.isValidEmail(email)) break;
+                                    System.out.println("Invalid email format. Try again.");
+                                }
+                            
+                                // Phone number input with validation
+                                String phone;
+                                while (true) {
+                                    System.out.print("Enter student phone: ");
+                                    phone = sc.nextLine();
+                                    if (phone.matches("\\d{10}")) { // Accepts 10 digits
+                                        break;
+                                    } else {
+                                        System.out.println("Invalid phone number. Please enter digits only (10-15 digits).");
+                                    }
+                                }
+                            
+                                // Duplicate student check
+                                if (studentService.isDuplicateStudent(name, email)) {
+                                    throw new DuplicateStudentException(name, email);
+                                }
+                                // Student type selection with validation
+                                System.out.println("Student type: ");
+                                System.out.println("1. Regular Student (Passing grade: 50%)");
+                                System.out.println("2. Honors Student (Passing grade: 60%, honors recognition)");
+                                System.out.print("Select type (1-2): ");
+                                int type = -1;
+                                while (type != 1 && type != 2) {
+                                    String typeInput = sc.nextLine();
+                                    try {
+                                        type = Integer.parseInt(typeInput);
+                                        if (type != 1 && type != 2) {
+                                            System.out.println("Invalid selection. Please enter 1 or 2.");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Invalid input. Please enter 1 or 2.");
+                                    }
+                                }
+                                // Create and add new student based on type
+
+                                Student newStudent = (type == 2)
+                                        ? new HonorsStudent(name, age, email, phone)
+                                        : new RegularStudent(name, age, email, phone);
+                                studentService.addStudent(newStudent);
+                                System.out.println("Student added successfully!");
+                                studentAdded = true;
+                            } catch (DuplicateStudentException e) {
+                                // Handles duplicate student scenario and prompts user to retry or exit
+
+                                System.out.println("ERROR: " + e.getMessage());
+                                System.out.print("Duplicate student detected. Try again? (Y/N): ");
+                                String retry = sc.nextLine();
+                                if (!retry.equalsIgnoreCase("Y")) {
+                                    break;
+                                }
+                            }
                         }
-                        System.out.print("Enter student phone: ");
-                        String phone = sc.nextLine();
-                        if (studentService.isDuplicateStudent(name, email)) {
-                            throw new DuplicateStudentException(name, email);
-                        }
-                        System.out.println("Student type: ");
-                        System.out.println("1. Regular Student (Passing grade: 50%)");
-                        System.out.println("2. Honors Student (Passing grade: 60%, honors recognition)");
-                        System.out.print("Select type (1-2): ");
-                        int type = sc.nextInt();
-                        sc.nextLine();
-                        Student newStudent = (type == 2)
-                                ? new HonorsStudent(name, age, email, phone)
-                                : new RegularStudent(name, age, email, phone);
-                        studentService.addStudent(newStudent);
-                        System.out.println("Student added successfully!");
                         break;
 
                     case 2:
