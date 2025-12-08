@@ -11,8 +11,6 @@ import models.Subject;
 import exceptions.*;
 
 
-//Needed for the file writing
-
 
 
 public class GradeService {
@@ -311,7 +309,7 @@ public class GradeService {
     }
 
     //Check for grade duplicates when importing
-    private boolean isDuplicateGrade(String studentId, String subjectName, String subjectType) {
+     boolean isDuplicateGrade(String studentId, String subjectName, String subjectType) {
         for (int i = 0; i < gradeCount; i++) {
             Grade g = grades[i];
             if (g != null &&
@@ -331,7 +329,7 @@ public class GradeService {
 
 
     // Helper method to update the grade value for a duplicate
-    private void updateGrade(String studentId, String subjectName, String subjectType, int newValue) {
+     void updateGrade(String studentId, String subjectName, String subjectType, int newValue) {
         for (int i = 0; i < gradeCount; i++) {
             Grade g = grades[i];
             if (g != null &&
