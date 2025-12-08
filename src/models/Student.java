@@ -6,7 +6,7 @@ package models;
 
 import services.GradeService;
 
-public abstract class Student {
+public class Student {
     protected String studentID;
     protected String name;
     protected int age;
