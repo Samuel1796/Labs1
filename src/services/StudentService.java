@@ -148,7 +148,7 @@ public class StudentService {
                     student.getStatus(),
                     student.getEnrolledSubjectsString().length(),
                     student.getPassingGrade(),
-                    student.isHonorsEligible() ? "Yes" : "No");
+                    (student instanceof HonorsStudent ? ((HonorsStudent)student).isHonorsEligible(gradeService) : student.isHonorsEligible()) ? "Yes" : "No");
         }
         System.out.println("|=============================================================================================================================================|");
     }

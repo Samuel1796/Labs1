@@ -93,7 +93,7 @@ public class Main {
                                     if (phone.matches("\\d{10}")) { // Accepts 10 digits
                                         break;
                                     } else {
-                                        System.out.println("Invalid phone number. Please enter digits only (10-15 digits).");
+                                        System.out.println("Invalid phone number. Please enter digits only (10 digits).");
                                     }
                                 }
                             
@@ -145,7 +145,7 @@ public class Main {
                         break;
                     case 3:
                         // RECORD GRADE
-                        // Complex logic: Handles subject selection, grade validation, and duplicate grade detection
+                        //  Handles subject selection, grade validation, and duplicate grade detection
                         while (true) {
                             try {
                                 System.out.print("Enter Student ID: ");
@@ -218,9 +218,22 @@ public class Main {
                                 String confirm = sc.nextLine();
 
                                 if (confirm.equalsIgnoreCase("Y")) {
-                                    Grade grade = new Grade(nextGradeID, foundStudent.getStudentID(), subject.getSubjectName(), subject.getSubjectType(), gradeValue, date);
-                                    gradeService.recordGrade(grade);
-                                    System.out.printf("Grade recorded successfully! Grade ID: %s%n", nextGradeID);
+                                    // Check for duplicate grade before recording
+                                    if (gradeService.isDuplicateGrade(foundStudent.getStudentID(), subject.getSubjectName(), subject.getSubjectType())) {
+                                        System.out.printf("A grade for %s (%s) already exists for this student. Overwrite with new value? [Y/N]: ",
+                                                subject.getSubjectName(), subject.getSubjectType());
+                                        String overwrite = sc.nextLine();
+                                        if (overwrite.equalsIgnoreCase("Y")) {
+                                            gradeService.updateGrade(foundStudent.getStudentID(), subject.getSubjectName(), subject.getSubjectType(), (int) gradeValue);
+                                            System.out.printf("Grade updated successfully!%n");
+                                        } else {
+                                            System.out.println("Grade recording canceled due to duplicate.");
+                                        }
+                                    } else {
+                                        Grade grade = new Grade(nextGradeID, foundStudent.getStudentID(), subject.getSubjectName(), subject.getSubjectType(), gradeValue, date);
+                                        gradeService.recordGrade(grade);
+                                        System.out.printf("Grade recorded successfully! Grade ID: %s%n", nextGradeID);
+                                    }
                                 } else {
                                     System.out.println("Grade recording canceled.");
                                 }
