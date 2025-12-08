@@ -8,7 +8,7 @@ public class HonorsStudent extends Student {
 
 //    @Override
     public boolean isHonorsEligible(services.GradeService gradeService) {
-        return super.isHonorsEligible() && calculateAverage(gradeService) >= passingGrade;
+        return calculateAverage(gradeService) >= passingGrade;
     }
 
 

@@ -309,7 +309,7 @@ public class GradeService {
     }
 
     //Check for grade duplicates when importing
-     boolean isDuplicateGrade(String studentId, String subjectName, String subjectType) {
+     public boolean isDuplicateGrade(String studentId, String subjectName, String subjectType) {
         for (int i = 0; i < gradeCount; i++) {
             Grade g = grades[i];
             if (g != null &&
@@ -329,7 +329,7 @@ public class GradeService {
 
 
     // Helper method to update the grade value for a duplicate
-     void updateGrade(String studentId, String subjectName, String subjectType, int newValue) {
+     public void updateGrade(String studentId, String subjectName, String subjectType, int newValue) {
         for (int i = 0; i < gradeCount; i++) {
             Grade g = grades[i];
             if (g != null &&
