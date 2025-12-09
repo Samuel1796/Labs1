@@ -6,56 +6,61 @@ This is a command-line based Student Grade Management System built in Java. The 
 
 ## 2. Features
 
-*   **Add Students**: Add new students to the system. You can specify whether a student is a `RegularStudent` or an `HonorsStudent`.
-*   **View All Students**: Display a formatted table of all students, including their ID, name, type, average grade, status, and more.
-*   **Record Grades**: Record grades for a specific student in either "Core" or "Elective" subjects.
-*   **View Grade Report**: Generate a detailed grade report for an individual student, showing their grade history, overall average, and performance summary.
-*   **Differentiated Student Types**:
-    *   **Regular Student**: Standard passing grade of 50%.
-    *   **Honors Student**: Higher passing grade of 60% and eligibility for honors recognition.
-*   **Sample Data**: The system initializes with a set of sample students and grades to demonstrate its functionality immediately.
+See [CHANGELOG.md](CHANGELOG.md) for a full list of features and updates.
 
 ## 3. Project Structure
 
-The project is composed of several classes that model the domain of a school's grading system:
+- `src/`: Source code and service classes.
+- `out/production/Lab1/`: Compiled `.class` files for running the application.
+- `htmlReport/`: HTML code coverage reports.
+- `reports/`: Text-based test reports.
+- See [GIT_WORKFLOW.md](GIT_WORKFLOW.md) for recommended Git practices.
 
-*   `Main.java`: The main entry point and controller of the application. It handles user input, displays menus, and orchestrates the calls to other parts of the system. It also holds the in-memory data stores for students and grades.
-*   `Student.java`: An abstract base class for all student types. It defines common properties like name, age, email, and methods for grade calculation.
-*   `RegularStudent.java`: A concrete class that extends `Student`. It sets the passing grade to 50%.
-*   `HonorsStudent.java`: A concrete class that extends `Student`. It sets a higher passing grade of 60% and includes logic for honors eligibility.
-*   `Grade.java`: A data class that represents a single grade entry, containing information like the student ID, subject, grade value, and date.
-*   `Subject.java`: An abstract base class for subjects, defining common properties like subject name and type.
-*   `CoreSubject.java`: A subclass representing core academic subjects (e.g., Mathematics, Science).
-*   `ElectiveSubject.java`: A subclass representing elective subjects (e.g., Art, Physical Education).
+## 4. Setup Instructions
 
-## 4. How to Run the Project
+### Prerequisites
 
-To compile and run this project, you will need the Java Development Kit (JDK) installed on your machine.
+- Java Development Kit (JDK) installed.
+- IntelliJ IDEA (recommended) or any Java IDE.
 
-1.  **Navigate to the Source Directory**:
-    Open a terminal or command prompt and change the directory to the `src` folder where your `.java` files are located.
+### Running the Application (Compiled Classes)
 
+1. Open a terminal and navigate to the compiled classes directory:
     ```bash
-    cd path/to/your/project/src
+    cd C:\Users\SamuelOduroDuahBoaky\OneDrive - AmaliTech gGmbH\Desktop\QA\Labs1\out\production\Lab1
     ```
-
-2.  **Compile the Java Files**:
-    Compile all the `.java` source files using the `javac` command.
-
-    ```bash
-    javac *.java
-    ```
-
-3.  **Run the Application**:
-    Run the compiled application by executing the `Main` class.
-
+2. Run the application:
     ```bash
     java Main
     ```
 
-    You will then see the main menu and can start interacting with the application.
+### Running from Source (IntelliJ IDEA)
 
-## 5. Usage Guide
+1. Open the project folder in IntelliJ IDEA.
+2. Build the project: `Build > Build Project`.
+3. Run: Right-click `Main.java` > **Run 'Main'**.
+
+## 5. Testing Instructions
+
+- All tests are located in `src/services/`.
+- To run tests in IntelliJ IDEA:
+    - Right-click the `src/services` folder or any test class and select **Run 'Tests'** or **Run 'Tests with Coverage'**.
+    - View coverage results in the IDE or open `htmlReport/index.html` for a summary.
+- To run tests from the command line (if JUnit is set up):
+    ```bash
+    cd C:\Users\SamuelOduroDuahBoaky\OneDrive - AmaliTech gGmbH\Desktop\QA\Labs1\src
+    javac -cp .;path\to\junit-5.jar;path\to\mockito-core.jar services\*.java
+    java -cp .;path\to\junit-5.jar;path\to\mockito-core.jar org.junit.runner.JUnitCore services.StudentServiceTest
+    ```
+- See [TEST_EXECUTION_GUIDE.md](TEST_EXECUTION_GUIDE.md) for detailed instructions.
+
+## 6. Usage Guide
 
 Upon running the application, you will be presented with the main menu:
 
+
+## 7. Additional Documentation
+
+- [CHANGELOG.md](CHANGELOG.md): Feature and update history.
+- [TEST_EXECUTION_GUIDE.md](TEST_EXECUTION_GUIDE.md): How to run and interpret tests.
+- [GIT_WORKFLOW.md](GIT_WORKFLOW.md): Git workflow and best practices.
