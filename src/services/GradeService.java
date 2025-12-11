@@ -37,6 +37,9 @@ public class GradeService {
         if (gradeCount >= grades.length) {
             throw new AppExceptions("Grade database full!");
         }
+        if (grade.getValue() < 0 || grade.getValue() > 100) {
+            throw new InvalidGradeException(grade.getValue());
+        }
         grades[gradeCount++] = grade;
         return true;
     }

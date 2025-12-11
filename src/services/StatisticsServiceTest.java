@@ -103,17 +103,11 @@ class StatisticsServiceTest {
 
 
 //    EDGE CASES
-//@Test
-//void testStatisticsWithInvalidGrades() {
-//    Grade invalidGrade = new Grade("GRD004", student.getStudentID(), "Math", "Core Subject", -10, new Date());
-//    gradeService.recordGrade(invalidGrade);
-//    // Should ignore invalid grades in statistics
-//    assertTrue(statisticsService.calculateMean() >= 0);
-//}
 
-//    @Test
-//    void testGetSubjectAveragesWithNonExistentSubject() {
-//        assertNull(statisticsService.getSubjectAverages().get("NonExistentSubject"));
-//    }
+
+    @Test
+    void testGetSubjectAveragesWithNonExistentSubject() {
+        assertNull(statisticsService.getSubjectAverages().get("NonExistentSubject"));
+    }
 
 }

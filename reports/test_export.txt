@@ -4,13 +4,14 @@ Student: STU001 - Test Student
 Type: Regular Student
 Total Grades: 1
 Average: 80.0%
-Status: FAILING
+Status: PASSING
 
 GRADE HISTORY
 =============
 GRD ID   DATE         SUBJECT         TYPE            GRADE   
-GRD002   10-12-2025   Science         Core Subject    85.0    
+GRD002   11-12-2025   Science         Core Subject    85.0    
 
 Performance Summary:
-Not meeting passing grade requirement (50%)
+Passing all Core subjects
+Meeting passing grade requirement (50%)
 Regular Student - standard grading (passing grade: 50%)

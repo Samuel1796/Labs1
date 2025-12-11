@@ -42,6 +42,8 @@ class IntegrationTest {
         when(mockStudent.getName()).thenReturn("Test Student");
         when(mockStudent.getPassingGrade()).thenReturn(50);
         when(mockStudent.calculateAverage(any(GradeService.class))).thenReturn(80.0);
+        when(mockStudent.isPassing(any(GradeService.class))).thenReturn(true);
+
     }
 
 
@@ -50,7 +52,7 @@ class IntegrationTest {
      */
     @Test
     void testRecordGradeAndViewGradeReport() {
-        Grade grade = new Grade("GRD001", "STU001", "Mathematics", "Core Subject", -2, new Date());
+        Grade grade = new Grade("GRD001", "STU001", "Mathematics", "Core Subject", 89, new Date());
         gradeService.recordGrade(grade);
 
         // Should not throw any exceptions when viewing grade report
@@ -113,41 +115,10 @@ class IntegrationTest {
         assertEquals(2, gradeService.countGradesForStudent(mockStudent));
     }
 
-//    @Test
-//    void testGradeStatisticsIntegration() {
-//        GradeService gradeService = new GradeService();
-//        StatisticsService statisticsService = new StatisticsService(gradeService);
-//
-//        gradeService.recordGrade("stu001", "Math", 80);
-//        gradeService.recordGrade("stu001", "Science", 90);
-//
-//        double average = statisticsService.calculateAverage("stu001");
-//        assertEquals(85.0, average, 0.01);
-//    }
 
 
-//EDGE CASES
-//@Test
-//void testIntegrationWithInvalidGrade() {
-//    Grade invalidGrade = new Grade("GRD100", "STU001", "Math", "Core Subject", -20, new Date());
-//    assertThrows(AppExceptions.class, () -> gradeService.recordGrade(invalidGrade));
-//}
 
-//    @Test
-//    void testIntegrationWithDuplicateStudent() {
-//        StudentService studentService = new StudentService(2);
-//        Student s1 = new HonorsStudent("Test", 20, "test@email.com", "1234567890");
-//        studentService.addStudent(s1);
-//        assertThrows(DuplicateStudentException.class, () -> studentService.addStudent(s1));
-//    }
 
-//    @Test
-//    void testIntegrationWithNonExistentSubject() {
-//        StudentService studentService = new StudentService(2);
-//        Student s1 = new HonorsStudent("Test", 20, "test@email.com", "1234567890");
-//        studentService.addStudent(s1);
-//        assertNull(studentService.findSubjectByNameAndType("GhostSubject", "Core"));
-//    }
 
 
 

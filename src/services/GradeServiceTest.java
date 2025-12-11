@@ -1,6 +1,7 @@
 package services;
 
 import exceptions.AppExceptions;
+import exceptions.InvalidGradeException;
 import models.Grade;
 import models.Student;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,6 +67,7 @@ public class GradeServiceTest {
     void testIsDuplicateGrades(){
         grade = new Grade("GRD001", "STU001", "English", "Core Subject", 89, new Date());
         gradeService.recordGrade(grade);
+
         assertTrue(gradeService.isDuplicateGrade("STU001", "English", "Core Subject"));
     }
 
@@ -80,27 +82,19 @@ public class GradeServiceTest {
 
 //EDGE CASES
 
-//    @Test
-//    void testRecordInvalidGradeNegative() {
-//        Grade invalidGrade = new Grade("GRD002", "STU001", "Math", "Core Subject", -5, new Date());
-//        // Assuming GradeService should throw an exception for invalid grade
-//        assertThrows(AppExceptions.class, () -> gradeService.recordGrade(invalidGrade));
-//    }
+    @Test
+    void testRecordInvalidGradeNegative() {
+        Grade invalidGrade = new Grade("GRD002", "STU001", "Math", "Core Subject", -5, new Date());
+        assertThrows(InvalidGradeException.class, () -> gradeService.recordGrade(invalidGrade));
+    }
 
-//    @Test
-//    void testRecordInvalidGradeAbove100() {
-//        Grade invalidGrade = new Grade("GRD003", "STU001", "Math", "Core Subject", 105, new Date());
-//        assertThrows(AppExceptions.class, () -> gradeService.recordGrade(invalidGrade));
-//    }
+    @Test
+    void testRecordInvalidGradeAbove100() {
+        Grade invalidGrade = new Grade("GRD003", "STU001", "Math", "Core Subject", 105, new Date());
+        assertThrows(InvalidGradeException.class, () -> gradeService.recordGrade(invalidGrade));
+    }
 
-//    @Test
-//    void testDuplicateGradeEntry() {
-//        Grade grade1 = new Grade("GRD004", "STU001", "Math", "Core Subject", 80, new Date());
-//        Grade grade2 = new Grade("GRD004", "STU001", "Math", "Core Subject", 80, new Date());
-//        gradeService.recordGrade(grade1);
-//        // Should throw exception or return false for duplicate
-//        assertThrows(AppExceptions.class, () -> gradeService.recordGrade(grade2));
-//    }
+
 
 
 

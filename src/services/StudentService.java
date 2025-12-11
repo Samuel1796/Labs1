@@ -70,6 +70,9 @@ public class StudentService {
         if (studentCount >= students.length) {
             throw new AppExceptions("Student database full!");
         }
+        if (isDuplicateStudent(student.getName(), student.getEmail())) {
+            throw new DuplicateStudentException(student.getName(), student.getEmail());
+        }
         students[studentCount++] = student;
         return true;
     }

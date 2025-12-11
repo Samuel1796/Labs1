@@ -86,7 +86,7 @@ class StudentServiceTest {
 
     @Test
     void searchStudentsByType() {
-        Student s3  = new HonorsStudent("Anthony", 22, "anthony@gmail.com", "0557272539");
+        Student s3  = new HonorsStudent("Ant", 22, "ant@gmail.com", "0557272539");
         studentService.addStudent(s1);
         studentService.addStudent(s2);
         studentService.addStudent(s3);
@@ -102,26 +102,23 @@ class StudentServiceTest {
         assertEquals(s3, honors[0]);
     }
 
-//    @Test
-//    void findSubjectByNameAndType() {
-//
-//    }
 
 
-//    TEST CASES
-//@Test
-//void testAddDuplicateStudentThrowsException() {
-//    studentService.addStudent(s1);
-//    assertThrows(DuplicateStudentException.class, () -> {
-//        studentService.addStudent(s1);
-//    });
-//}
 
-//    @Test
-//    void testFindNonExistentSubjectReturnsNull() {
-//        Student s3 = new RegularStudent("Test", 20, "test@email.com", "1234567890");
-//        studentService.addStudent(s3);
-//        assertNull(studentService.findSubjectByNameAndType("NonExistentSubject", "Core"));
-//    }
+//    EDGE CASES
+@Test
+void testAddDuplicateStudentThrowsException() {
+    studentService.addStudent(s1);
+    assertThrows(DuplicateStudentException.class, () -> {
+        studentService.addStudent(s1);
+    });
+}
+
+    @Test
+    void testFindNonExistentSubjectReturnsNull() {
+        Student s3 = new RegularStudent("Test", 20, "test@email.com", "1234567890");
+        studentService.addStudent(s3);
+        assertNull(studentService.findSubjectByNameAndType("NonExistentSubject", "Core"));
+    }
 
 }
