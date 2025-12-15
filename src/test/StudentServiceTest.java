@@ -1,4 +1,4 @@
-package services;
+package test;
 
 import exceptions.DuplicateStudentException;
 import exceptions.StudentNotFoundException;
@@ -7,6 +7,8 @@ import models.RegularStudent;
 import models.Student;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import services.GradeService;
+import services.StudentService;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -9,7 +9,7 @@ Status: PASSING
 GRADE HISTORY
 =============
 GRD ID   DATE         SUBJECT         TYPE            GRADE   
-GRD002   11-12-2025   Science         Core Subject    85.0    
+GRD002   12-12-2025   Science         Core Subject    85.0    
 
 Performance Summary:
 Passing all Core subjects

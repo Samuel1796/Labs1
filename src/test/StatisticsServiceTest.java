@@ -1,10 +1,12 @@
-package services;
+package test;
 
 import models.Grade;
 import models.RegularStudent;
 import models.Student;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import services.GradeService;
+import services.StatisticsService;
 
 import java.util.Date;
 

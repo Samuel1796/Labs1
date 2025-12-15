@@ -1,4 +1,4 @@
-package services;
+package test;
 
 import exceptions.AppExceptions;
 import exceptions.InvalidGradeException;
@@ -6,6 +6,7 @@ import models.Grade;
 import models.Student;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import services.GradeService;
 
 import java.util.Date;
 

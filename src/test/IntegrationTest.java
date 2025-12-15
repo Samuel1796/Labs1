@@ -1,4 +1,4 @@
-package services;
+package test;
 
 import exceptions.AppExceptions;
 import exceptions.DuplicateStudentException;
@@ -8,6 +8,8 @@ import models.Student;
 import models.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import services.GradeService;
+import services.StudentService;
 
 import java.io.IOException;
 import java.util.Date;
