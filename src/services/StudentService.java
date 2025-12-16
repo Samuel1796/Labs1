@@ -4,8 +4,11 @@ import models.*;
 import exceptions.DuplicateStudentException;
 import exceptions.StudentNotFoundException;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import utilities.FileIOUtils;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -167,5 +170,38 @@ public class StudentService {
      */
     public String getEnrolledSubjectsString(Student student) {
         return student.getEnrolledSubjectsString();
+    }
+
+    public void exportStudentsCSV(String filename) throws IOException {
+        FileIOUtils.writeStudentsToCSV(Paths.get("./reports/" + filename + ".csv"), getStudents());
+    }
+
+    public void importStudentsCSV(String filename) throws IOException {
+        List<Student> imported = FileIOUtils.readStudentsFromCSV(Paths.get("./imports/" + filename + ".csv"));
+        for (Student s : imported) {
+            addStudent(s);
+        }
+    }
+
+    public void exportStudentsJSON(String filename) throws IOException {
+        FileIOUtils.writeStudentsToJSON(Paths.get("./reports/" + filename + ".json"), getStudents());
+    }
+
+    public void importStudentsJSON(String filename) throws IOException {
+        List<Student> imported = FileIOUtils.readStudentsFromJSON(Paths.get("./imports/" + filename + ".json"));
+        for (Student s : imported) {
+            addStudent(s);
+        }
+    }
+
+    public void exportStudentsBinary(String filename) throws IOException {
+        FileIOUtils.writeStudentsToBinary(Paths.get("./reports/" + filename + ".bin"), getStudents());
+    }
+
+    public void importStudentsBinary(String filename) throws IOException, ClassNotFoundException {
+        List<Student> imported = FileIOUtils.readStudentsFromBinary(Paths.get("./imports/" + filename + ".bin"));
+        for (Student s : imported) {
+            addStudent(s);
+        }
     }
 }
