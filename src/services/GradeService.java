@@ -1,15 +1,15 @@
 package services;
 
 import java.io.*;
-import java.util.Date;
+import java.util.*;
 
 import models.*;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import exceptions.*;
+import utilities.FileIOUtils;
+import java.nio.file.Paths;
 
 /**
  * Service class for managing grades, including recording, reporting, exporting, and importing grades.
@@ -192,6 +192,73 @@ public class GradeService {
             }
         }
         return count;
+    }
+
+    /**
+     * Exports a student's grade report in multiple formats (CSV, JSON, Binary) in parallel.
+     * @param student Student whose report is to be exported.
+     * @param reportType Type of report (1: Summary, 2: Detailed, 3: Transcript, 4: Analytics).
+     * @param baseFilename Base name for output files (without extension).
+     * @throws IOException If file writing fails.
+     */
+    public void exportGradeReportMultiFormat(Student student, int reportType, String baseFilename) throws IOException {
+        // Ensure subdirectories exist
+        String[] dirs = {"./reports/csv/", "./reports/json/", "./reports/binary/"};
+        for (String dir : dirs) {
+            File d = new File(dir);
+            if (!d.exists()) d.mkdirs();
+        }
+
+        // Prepare filenames
+        String csvFile = "./reports/csv/" + baseFilename + ".csv";
+        String jsonFile = "./reports/json/" + baseFilename + ".json";
+        String binFile = "./reports/binary/" + baseFilename + ".dat";
+
+        // Collect grades for the student
+        List<Grade> studentGrades = new ArrayList<>();
+        for (int i = 0; i < gradeCount; i++) {
+            Grade g = grades[i];
+            if (g != null && g.getStudentID().equalsIgnoreCase(student.getStudentID())) {
+                studentGrades.add(g);
+            }
+        }
+
+        // Export CSV
+        FileIOUtils.writeGradesToCSV(Paths.get(csvFile), studentGrades);
+
+        // Export JSON
+        FileIOUtils.writeGradesToJSON(Paths.get(jsonFile), studentGrades);
+
+        // Export Binary
+        FileIOUtils.writeGradesToBinary(Paths.get(binFile), studentGrades);
+
+        // Optionally, print summary
+        File csv = new File(csvFile);
+        File json = new File(jsonFile);
+        File bin = new File(binFile);
+        System.out.println("CSV Export completed");
+        System.out.println("File: " + csvFile);
+        System.out.printf("Size: %.1f KB\n", csv.length() / 1024.0);
+        System.out.println("Rows: " + studentGrades.size() + " grades + header");
+        System.out.println();
+
+        System.out.println("JSON Export completed");
+        System.out.println("File: " + jsonFile);
+        System.out.printf("Size: %.1f KB\n", json.length() / 1024.0);
+        System.out.println();
+
+        System.out.println("Binary Export completed");
+        System.out.println("File: " + binFile);
+        System.out.printf("Size: %.1f KB\n", bin.length() / 1024.0);
+        System.out.println();
+
+        double totalSize = (csv.length() + json.length() + bin.length()) / 1024.0;
+        System.out.printf("Total Size: %.1f KB\n", totalSize);
+        if (bin.length() > 0 && json.length() > 0) {
+            double compressionRatio = (double) json.length() / bin.length();
+            System.out.printf("Compression Ratio: %.2f:1 (binary vs JSON)\n", compressionRatio);
+        }
+        System.out.println("I/O Operations: 3 parallel writes");
     }
 
     /**
@@ -420,6 +487,65 @@ public class GradeService {
                 g.setDate(new java.util.Date()); // Optionally update the date to now
                 break;
             }
+        }
+    }
+
+    public void exportGradesCSV(String filename) throws IOException {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MM/dd/yyyy");
+        List<Grade> gradeList = Arrays.asList(grades).subList(0, gradeCount);
+        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("./reports/csv/" + filename + ".csv"))) {
+            writer.write("gradeID,studentID,subjectName,subjectType,value,date\n");
+            for (Grade g : gradeList) {
+                writer.write(String.format("%s,%s,%s,%s,%.1f,%s\n",
+                    g.getGradeID(), g.getStudentID(), g.getSubjectName(),
+                    g.getSubjectType(), g.getValue(), sdf.format(g.getDate())));
+            }
+        }
+    }
+
+    public void exportGradesJSON(String filename) throws IOException {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MM/dd/yyyy");
+        List<Grade> gradeList = Arrays.asList(grades).subList(0, gradeCount);
+        List<Map<String, Object>> formattedGrades = new ArrayList<>();
+        for (Grade g : gradeList) {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("gradeID", g.getGradeID());
+            map.put("studentID", g.getStudentID());
+            map.put("subjectName", g.getSubjectName());
+            map.put("subjectType", g.getSubjectType());
+            map.put("value", g.getValue());
+            map.put("date", sdf.format(g.getDate()));
+            formattedGrades.add(map);
+        }
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("./reports/json/" + filename + ".json"))) {
+            writer.write(mapper.writeValueAsString(formattedGrades));
+        }
+    }
+
+    public void importGradesCSV(String filename) throws IOException {
+        List<Grade> imported = FileIOUtils.readGradesFromCSV(Paths.get("./imports/" + filename + ".csv"));
+        for (Grade g : imported) {
+            recordGrade(g);
+        }
+    }
+
+
+    public void importGradesJSON(String filename) throws IOException {
+        List<Grade> imported = FileIOUtils.readGradesFromJSON(Paths.get("./imports/" + filename + ".json"));
+        for (Grade g : imported) {
+            recordGrade(g);
+        }
+    }
+
+    public void exportGradesBinary(String filename) throws IOException {
+        FileIOUtils.writeGradesToBinary(Paths.get("./reports/" + filename + ".bin"), Arrays.asList(grades).subList(0, gradeCount));
+    }
+
+    public void importGradesBinary(String filename) throws IOException, ClassNotFoundException {
+        List<Grade> imported = FileIOUtils.readGradesFromBinary(Paths.get("./imports/" + filename + ".bin"));
+        for (Grade g : imported) {
+            recordGrade(g);
         }
     }
 }

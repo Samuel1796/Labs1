@@ -1,14 +1,18 @@
 import models.*;
 import services.*;
 import exceptions.*;
-
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Scanner;
+import utilities.FileIOUtils;
+import java.nio.file.Paths;
+
+
 
 // Main application class for Student Grade Management System.
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Initialize services
         StudentService studentService = new StudentService();
         GradeService gradeService = new GradeService(500);
@@ -19,10 +23,7 @@ public class Main {
         Grade[] grades = gradeService.getGrades();
         int[] studentCountRef = {studentService.getStudentCount()};
         int[] gradeCountRef = {gradeService.getGradeCount()};
-//        StudentService.initializeSampleStudents(students, grades, studentCountRef, gradeCountRef);
 
-        // Update the counts in the services
-//        studentService.setStudentCount(studentCountRef[0]);
         gradeService.setGradeCount(gradeCountRef[0]);
 
         StatisticsService statisticsService = new StatisticsService(
@@ -32,6 +33,11 @@ public class Main {
                 studentService.getStudentCount(),
                 gradeService
         );
+
+        FileIOUtils.monitorDirectory(Paths.get("./imports"), () -> {
+            System.out.println("New file detected in imports directory!");
+            // Optionally trigger import logic here
+        });
 
         Scanner sc = new Scanner(System.in);
         boolean running = true;
@@ -46,3 +52,4 @@ public class Main {
         }
     }
 }
+

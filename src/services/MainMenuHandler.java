@@ -247,7 +247,7 @@ public class MainMenuHandler {
 
                 case 5:
                     // Export Grade Report
-                    System.out.println("EXPORT GRADE REPORT");
+                    System.out.println("EXPORT GRADE REPORT (Multi-Format)");
                     System.out.println("_____________________________");
                     System.out.println();
                     boolean foundExport = false;
@@ -269,20 +269,35 @@ public class MainMenuHandler {
                     }
                     if (!foundExport || exportStudent == null) break;
 
-                    System.out.printf("Student: %s - %s%n", exportStudent.getStudentID(), exportStudent.getName());
-                    System.out.printf("Type: %s%n", (exportStudent instanceof HonorsStudent) ? "Honors Student" : "Regular Student");
+                    System.out.printf("Student: %s - %s (%s)%n", exportStudent.getStudentID(), exportStudent.getName(), exportStudent.getEmail());
+                    System.out.printf("Type: %s | Phone: %s%n", (exportStudent instanceof HonorsStudent) ? "Honors Student" : "Regular Student", exportStudent.getPhone());
                     System.out.println("Total Grades: " + gradeService.countGradesForStudent(exportStudent));
-                    System.out.println("Export options:");
-                    System.out.println("1. Summary Report (overview only)");
-                    System.out.println("2. Detailed Report (all grades)");
-                    System.out.println("3. Both");
-                    int exportOption = 0;
-                    while (exportOption < 1 || exportOption > 3) {
-                        System.out.print("Select option (1-3): ");
+                    System.out.println("Export Format:");
+                    System.out.println("1. CSV");
+                    System.out.println("2. JSON");
+                    System.out.println("3. Binary");
+                    System.out.println("4. All formats");
+                    int exportFormat = 0;
+                    while (exportFormat < 1 || exportFormat > 4) {
+                        System.out.print("Select format (1-4): ");
                         try {
-                            exportOption = Integer.parseInt(sc.nextLine());
+                            exportFormat = Integer.parseInt(sc.nextLine());
                         } catch (NumberFormatException e) {
-                            System.out.println("Invalid input. Please enter a number between 1 and 3.");
+                            System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                        }
+                    }
+                    System.out.println("Report Type:");
+                    System.out.println("1. Summary Report");
+                    System.out.println("2. Detailed Report");
+                    System.out.println("3. Transcript Format");
+                    System.out.println("4. Performance Analytics");
+                    int reportType = 0;
+                    while (reportType < 1 || reportType > 4) {
+                        System.out.print("Select type (1-4): ");
+                        try {
+                            reportType = Integer.parseInt(sc.nextLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Please enter a number between 1 and 4.");
                         }
                     }
                     System.out.print("Enter filename (without extension): ");
@@ -292,20 +307,68 @@ public class MainMenuHandler {
                         break;
                     }
                     try {
-                        String exportPath = gradeService.exportGradeReport(exportStudent, exportOption, filename);
+                        if (exportFormat == 4) {
+                            gradeService.exportGradeReportMultiFormat(exportStudent, reportType, filename);
+                        } else if (exportFormat == 1) {
+                            gradeService.exportGradesCSV(filename);
+                        } else if (exportFormat == 2) {
+                            gradeService.exportGradesJSON(filename);
+                        } else if (exportFormat == 3) {
+                            gradeService.exportGradesBinary(filename);
+                        }
                         System.out.println("Report exported successfully!");
-                        System.out.println("File: txt");
-                        System.out.println("Location: ./reports/");
-                        java.io.File file = new java.io.File(exportPath);
-                        double sizeKB = file.length() / 1024.0;
-                        System.out.printf("Size: %.1f KB%n", sizeKB);
-                        System.out.printf("Contains: %d grades, averages, performance summary%n", gradeService.countGradesForStudent(exportStudent));
                     } catch (Exception e) {
                         System.out.println("Export failed: " + e.getMessage());
                     }
                     break;
 
+//                    IMPORT DATA MULTI FORMAT SUPPORT
                 case 6:
+                    System.out.println("IMPORT STUDENTS");
+                    System.out.println("1. CSV");
+                    System.out.println("2. JSON");
+                    System.out.println("3. Binary");
+                    System.out.print("Select format (1-3): ");
+                    int importFormat = Integer.parseInt(sc.nextLine());
+                    System.out.print("Enter filename (without extension): ");
+                    String importFilename = sc.nextLine().trim();
+                    try {
+                        switch (importFormat) {
+                            case 1:
+                                studentService.importStudentsCSV(importFilename);
+                                System.out.println("Students imported from CSV.");
+                                break;
+                            case 2:
+                                studentService.importStudentsJSON(importFilename);
+                                System.out.println("Students imported from JSON.");
+                                break;
+                            case 3:
+                                studentService.importStudentsBinary(importFilename);
+                                System.out.println("Students imported from binary.");
+                                break;
+                            default:
+                                System.out.println("Invalid format.");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Import failed: " + e.getMessage());
+                    }
+                    break;
+
+//                    BULK IMPORT
+                case 7:
+                    System.out.println("BULK IMPORT GRADES");
+                    System.out.println("_______________________________");
+                    System.out.println("Place your CSV file in: ./imports/");
+                    System.out.println("CSV Format Required:");
+                    System.out.println("StudentID,SubjectName,SubjectType,Grade");
+                    System.out.println("Example: STU001,Mathematics,Core,85");
+                    System.out.print("Enter filename (without extension): ");
+                     importFilename = sc.nextLine().trim();
+                    gradeService.bulkImportGrades(importFilename, studentService);
+                    break;
+
+
+                case 8:
                     // Calculate Student GPA
                     System.out.println("CALCULATE STUDENT GPA");
                     System.out.println("_____________________________");
@@ -330,19 +393,8 @@ public class MainMenuHandler {
                     statisticsService.printStudentGPAReport(gpaStudent);
                     break;
 
-                case 7:
-                    System.out.println("BULK IMPORT GRADES");
-                    System.out.println("_______________________________");
-                    System.out.println("Place your CSV file in: ./imports/");
-                    System.out.println("CSV Format Required:");
-                    System.out.println("StudentID,SubjectName,SubjectType,Grade");
-                    System.out.println("Example: STU001,Mathematics,Core,85");
-                    System.out.print("Enter filename (without extension): ");
-                    String importFilename = sc.nextLine().trim();
-                    gradeService.bulkImportGrades(importFilename, studentService);
-                    break;
-
-                case 8:
+//                    VIEW CLASS STATS
+                case 9:
                     // STATISTICAL ANALYSIS
                     StatisticsService statsService = new StatisticsService(
                             gradeService.getGrades(),
@@ -354,7 +406,19 @@ public class MainMenuHandler {
                     statsService.printStatisticsReport();
                     break;
 
-                case 9:
+
+//                    REAL TIME STATS
+                case 10:
+                    break;
+
+//                    GENERATE BATCH REPORT
+                case 11:
+                        break;
+
+
+
+//
+                case 12:
                     System.out.println("SEARCH STUDENTS");
                     System.out.println("_____________________________");
                     System.out.println("Search options:");
@@ -425,6 +489,18 @@ public class MainMenuHandler {
                         }
                     }
                     break;
+
+//                    PATTERN BASED SEARCH
+                case 13:
+
+                    break;
+
+
+//                    QUERY GRADE HISTORY
+                case 14:
+                    break;
+
+
 
                 case 0:
                     System.out.println("Exiting program...");
