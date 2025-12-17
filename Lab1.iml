@@ -68,5 +68,8 @@
     <orderEntry type="library" name="fasterxml-jackson.core" level="project" />
     <orderEntry type="library" name="fasterxml.jackson.core.databind" level="project" />
     <orderEntry type="library" name="mockito.core" level="project" />
+    <orderEntry type="library" name="ch.codeblock.qrinvoice.itext5" level="project" />
+    <orderEntry type="library" name="ch.sbb.polarion.thirdparty.bundles.apache.poi" level="project" />
+    <orderEntry type="library" name="json" level="project" />
   </component>
 </module>

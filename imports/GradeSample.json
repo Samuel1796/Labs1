@@ -1,0 +1,38 @@
+[
+  {
+    "studentId": "STU001",
+    "subjectName": "Mathematics",
+    "subjectType": "Core Subject",
+    "gradeStr": "85"
+  },
+  {
+    "studentId": "STU002",
+    "subjectName": "English",
+    "subjectType": "Core Subject",
+    "gradeStr": "78"
+  },
+  {
+    "studentId": "STU003",
+    "subjectName": "Science",
+    "subjectType": "Core Subject",
+    "gradeStr": "92"
+  },
+  {
+    "studentId": "STU001",
+    "subjectName": "Art",
+    "subjectType": "Elective Subject",
+    "gradeStr": "88"
+  },
+  {
+    "studentId": "STU002",
+    "subjectName": "Physical Education",
+    "subjectType": "Elective Subject",
+    "gradeStr": "95"
+  },
+  {
+    "studentId": "STU003",
+    "subjectName": "Mathematics",
+    "subjectType": "Core Subject",
+    "gradeStr": "80"
+  }
+]

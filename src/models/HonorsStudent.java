@@ -1,12 +1,14 @@
 package models;
 
-import services.GradeService;
+import services.file.GradeService;
 import utilities.StudentIdGenerator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HonorsStudent implements Student {
+public class HonorsStudent implements Student, Serializable {
+    private static final long serialVersionUID = 1L;
     // Fields from previous Student class
     private String studentID;
     private String name;
@@ -52,19 +54,64 @@ public class HonorsStudent implements Student {
         }
     }
 
+    /**
+     * Calculates the average grade for this honors student by aggregating all grades from GradeService.
+     * 
+     * This method implements the same algorithm as RegularStudent but applies to Honors students.
+     * Honors students may have different grading standards (higher passing grade), but the
+     * average calculation itself is identical.
+     * 
+     * Algorithm:
+     * 1. Retrieves all grades from centralized GradeService
+     * 2. Filters grades belonging to this specific student (by student ID)
+     * 3. Sums all grade values
+     * 4. Calculates mean (average) by dividing sum by count
+     * 
+     * Design Note:
+     * Honors students use the same calculation logic as regular students.
+     * The difference lies in passing grade thresholds (60% vs 50%) and eligibility criteria,
+     * not in how the average is computed.
+     * 
+     * Performance Characteristics:
+     * - Time Complexity: O(n) where n is total number of grades in system
+     * - Must scan all grades to find this student's grades
+     * - Consider indexing by student ID for better performance with many students
+     * 
+     * Edge Cases:
+     * - Returns 0.0 if student has no grades (prevents division by zero)
+     * - Case-insensitive ID matching ensures consistency
+     * - Null-safe: handles null grades in array
+     * 
+     * @param gradeService Service containing all grades in the system
+     * @return Average grade (0-100), or 0.0 if student has no grades
+     */
     @Override
     public double calculateAverage(GradeService gradeService) {
+        // Initialize accumulator variables
         double total = 0.0;
         int count = 0;
+        
+        // Retrieve all grades from centralized storage
+        // GradeService maintains a single array of all grades
         Grade[] gradesArr = gradeService.getGrades();
         int gradeCountArr = gradeService.getGradeCount();
+        
+        // Linear search: iterate through all grades to find this student's grades
+        // This is O(n) where n is total grades - acceptable for typical class sizes
         for (int i = 0; i < gradeCountArr; i++) {
             Grade g = gradesArr[i];
+            
+            // Filter: only process grades belonging to this student
+            // Case-insensitive matching ensures ID consistency
             if (g != null && g.getStudentID().equalsIgnoreCase(this.getStudentID())) {
+                // Accumulate grade values for average calculation
                 total += g.getValue();
                 count++;
             }
         }
+        
+        // Calculate mean: sum divided by count
+        // Division by zero protection: returns 0.0 if no grades found
         return count > 0 ? total / count : 0.0;
     }
 
@@ -74,7 +121,7 @@ public class HonorsStudent implements Student {
     }
 
     @Override
-    public boolean isHonorsEligible(services.GradeService gradeService) {
+    public boolean isHonorsEligible(GradeService gradeService) {
         return calculateAverage(gradeService) >= passingGrade;
     }
 

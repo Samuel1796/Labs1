@@ -4,9 +4,11 @@
 // Represents a student's grade record with all relevant data
 //  Includes grade ID, student ID, subject details, numeric value, and date
 package models;
+import java.io.Serializable;
 import java.util.Date;
 
-public class Grade {
+public class Grade implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String gradeID;
     private final String studentID;
     private final String subjectName;

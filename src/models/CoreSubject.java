@@ -1,6 +1,9 @@
 package models;
 
-public class CoreSubject implements Subject {
+import java.io.Serializable;
+
+public class CoreSubject implements Subject, Serializable {
+    private static final long serialVersionUID = 1L;
     private String subjectName;
     private String subjectCode;
 

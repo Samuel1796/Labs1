@@ -1,13 +1,13 @@
 package models;
 
-import services.GradeService;
+import services.file.GradeService;
 import java.util.List;
 
 public interface Student {
     void addGrade(double grade);
     double calculateAverage(GradeService gradeService);
     boolean isPassing(GradeService gradeService);
-    boolean isHonorsEligible(services.GradeService gradeService);
+    boolean isHonorsEligible(GradeService gradeService);
     int getPassingGrade();
     int getGradeCount();
     void enrollSubject(Subject subject);

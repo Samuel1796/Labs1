@@ -1,10 +1,14 @@
 import models.*;
-import services.*;
+import services.student.StudentService;
+import services.file.GradeService;
+import services.file.BatchReportTaskManager;
+import services.menu.MenuService;
+import services.menu.MainMenuHandler;
+import services.analytics.StatisticsService;
 import exceptions.*;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Scanner;
+import java.util.*;
+
 import utilities.FileIOUtils;
 import java.nio.file.Paths;
 
@@ -43,13 +47,31 @@ public class Main {
         boolean running = true;
 
         MainMenuHandler menuHandler = new MainMenuHandler(studentService, gradeService, menuService, statisticsService, sc);
-
+        List<Student> studentList = new ArrayList<>(studentService.getStudents());
+        int format = 1; // 1: CSV, 2: JSON, 3: Binary, 4: All formats
+        String outputDir = "./reports/batch_2025-12-17/";
+        int threadCount = 4;
+        
+        // Note: BatchReportTaskManager requires GradeImportExportService
+        services.file.GradeImportExportService gradeImportExportService = new services.file.GradeImportExportService(gradeService);
+        BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeImportExportService, format, outputDir, threadCount);
+        batchManager.startBatchExport();
+        while (batchManager.isRunning()) {
+            System.out.println("Background tasks running: " + batchManager.getActiveTasks());
+            try {
+                Thread.sleep(500); // Poll every 0.5s
+            } catch (InterruptedException e) {
+                // Optionally handle interruption (e.g., log or break)
+                System.out.println("Polling interrupted: " + e.getMessage());
+                break;
+            }
+        }
         while (running) {
             menuService.displayMainMenu();
+
             int choice = sc.nextInt();
             sc.nextLine();
             running = menuHandler.handleMenu(choice);
         }
     }
 }
-
