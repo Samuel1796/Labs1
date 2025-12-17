@@ -3,10 +3,12 @@ package models;
 import services.GradeService;
 import utilities.StudentIdGenerator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HonorsStudent implements Student {
+public class HonorsStudent implements Student, Serializable {
+    private static final long serialVersionUID = 1L;
     // Fields from previous Student class
     private String studentID;
     private String name;

@@ -2,9 +2,8 @@ import models.*;
 import services.*;
 import exceptions.*;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Scanner;
+import java.util.*;
+
 import utilities.FileIOUtils;
 import java.nio.file.Paths;
 
@@ -43,8 +42,23 @@ public class Main {
         boolean running = true;
 
         MainMenuHandler menuHandler = new MainMenuHandler(studentService, gradeService, menuService, statisticsService, sc);
-        BatchReportTaskManager batchManager;
-
+        List<Student> studentList = new ArrayList<>(studentService.getStudents());
+        int format = 1; // 1: CSV, 2: JSON, 3: Binary, 4: All formats
+        String outputDir = "./reports/batch_2025-12-17/";
+        int threadCount = 4;
+        
+        BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeService, format, outputDir, threadCount);
+        batchManager.startBatchExport();
+        while (batchManager.isRunning()) {
+            System.out.println("Background tasks running: " + batchManager.getActiveTasks());
+            try {
+                Thread.sleep(500); // Poll every 0.5s
+            } catch (InterruptedException e) {
+                // Optionally handle interruption (e.g., log or break)
+                System.out.println("Polling interrupted: " + e.getMessage());
+                break;
+            }
+        }
         while (running) {
             // Show background task status before menu
             if (menuHandler.getBatchManager() != null && menuHandler.getBatchManager().isRunning()) {

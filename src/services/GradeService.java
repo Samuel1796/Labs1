@@ -8,7 +8,9 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import models.*;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import java.text.SimpleDateFormat;
 
 import exceptions.*;
@@ -16,6 +18,7 @@ import utilities.FileIOUtils;
 import java.nio.file.Paths;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 /**
  * Service class for managing grades, including recording, reporting, exporting, and importing grades.
  */
@@ -78,8 +81,7 @@ public class GradeService {
     public boolean recordGrade(Grade grade) {
         throw new UnsupportedOperationException("Use recordGrade(Grade grade, StudentService studentService) instead.");
     }
-
-    /**
+/**
      * Returns the array of all grades.
      */
     public Grade[] getGrades() {
@@ -119,8 +121,7 @@ public class GradeService {
                 studentGrades.add(g);
             }
         }
-
-        if (studentGrades.isEmpty()) {
+if (studentGrades.isEmpty()) {
             System.out.printf("Passing Grade: %d%%%n", student.getPassingGrade());
             System.out.println("No grades recorded for this student.");
         } else {
@@ -207,63 +208,39 @@ public class GradeService {
      * @throws IOException If file writing fails.
      */
     public void exportGradeReportMultiFormat(Student student, int reportType, String baseFilename) throws IOException {
-        // Ensure subdirectories exist
-        String[] dirs = {"./reports/csv/", "./reports/json/", "./reports/binary/"};
-        for (String dir : dirs) {
-            File d = new File(dir);
-            if (!d.exists()) d.mkdirs();
-        }
-
-        // Prepare filenames
-        String csvFile = "./reports/csv/" + baseFilename + ".csv";
-        String jsonFile = "./reports/json/" + baseFilename + ".json";
-        String binFile = "./reports/binary/" + baseFilename + ".dat";
-
-        // Collect grades for the student
-        List<Grade> studentGrades = new ArrayList<>();
-        for (int i = 0; i < gradeCount; i++) {
-            Grade g = grades[i];
-            if (g != null && g.getStudentID().equalsIgnoreCase(student.getStudentID())) {
-                studentGrades.add(g);
+        // baseFilename should be something like "./reports/batch_2025-12-17/STU032"
+        String[] formats = {"csv", "json", "binary"};
+        String[] extensions = {".csv", ".json", ".dat"};
+        String[] subdirs = {"csv", "json", "binary"};
+    
+        for (int i = 0; i < formats.length; i++) {
+            String dirPath = baseFilename.substring(0, baseFilename.lastIndexOf('/')) + "/" + subdirs[i];
+            File dir = new File(dirPath);
+            if (!dir.exists()) dir.mkdirs();
+    
+            String filePath = dirPath + "/" + baseFilename.substring(baseFilename.lastIndexOf('/') + 1) + extensions[i];
+    
+            // Collect grades for the student
+            List<Grade> studentGrades = new ArrayList<>();
+            for (int j = 0; j < gradeCount; j++) {
+                Grade g = grades[j];
+                if (g != null && g.getStudentID().equalsIgnoreCase(student.getStudentID())) {
+                    studentGrades.add(g);
+                }
+            }
+    
+            switch (formats[i]) {
+                case "csv":
+                    FileIOUtils.writeGradesToCSV(Paths.get(filePath), studentGrades);
+                    break;
+                case "json":
+                    FileIOUtils.writeGradesToJSON(Paths.get(filePath), studentGrades);
+                    break;
+                case "binary":
+                    FileIOUtils.writeGradesToBinary(Paths.get(filePath), studentGrades);
+                    break;
             }
         }
-
-        // Export CSV
-        FileIOUtils.writeGradesToCSV(Paths.get(csvFile), studentGrades);
-
-        // Export JSON
-        FileIOUtils.writeGradesToJSON(Paths.get(jsonFile), studentGrades);
-
-        // Export Binary
-        FileIOUtils.writeGradesToBinary(Paths.get(binFile), studentGrades);
-
-        // Optionally, print summary
-        File csv = new File(csvFile);
-        File json = new File(jsonFile);
-        File bin = new File(binFile);
-        System.out.println("CSV Export completed");
-        System.out.println("File: " + csvFile);
-        System.out.printf("Size: %.1f KB\n", csv.length() / 1024.0);
-        System.out.println("Rows: " + studentGrades.size() + " grades + header");
-        System.out.println();
-
-        System.out.println("JSON Export completed");
-        System.out.println("File: " + jsonFile);
-        System.out.printf("Size: %.1f KB\n", json.length() / 1024.0);
-        System.out.println();
-
-        System.out.println("Binary Export completed");
-        System.out.println("File: " + binFile);
-        System.out.printf("Size: %.1f KB\n", bin.length() / 1024.0);
-        System.out.println();
-
-        double totalSize = (csv.length() + json.length() + bin.length()) / 1024.0;
-        System.out.printf("Total Size: %.1f KB\n", totalSize);
-        if (bin.length() > 0 && json.length() > 0) {
-            double compressionRatio = (double) json.length() / bin.length();
-            System.out.printf("Compression Ratio: %.2f:1 (binary vs JSON)\n", compressionRatio);
-        }
-        System.out.println("I/O Operations: 3 parallel writes");
     }
 
     /**
@@ -332,113 +309,150 @@ public class GradeService {
      * @param filename Name of the CSV file (without extension).
      * @param studentService StudentService instance for student lookup.
      */
-    public void bulkImportGrades(String filename, StudentService studentService) {
-        // Build file path for import
+    public void bulkImportGrades(String filename, String format, StudentService studentService) {
         String dirPath = "./imports/";
-        String filePath = dirPath + filename + ".csv";
+        String filePath = dirPath + filename + "." + format.toLowerCase();
         File file = new File(filePath);
-
+    
         if (!file.exists()) {
             System.out.println("File not found: " + filePath);
             return;
         }
-
-        System.out.println("Validating file...");
+    
         int totalRows = 0;
         int successCount = 0;
         int failCount = 0;
         List<String> failedRecords = new ArrayList<>();
-        List<String> failReasons = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            // Skip the header row
-            String header = br.readLine();
-
-            String line;
-            int rowNum = 2;
-            // Read each line and process grade import
-            while ((line = br.readLine()) != null) {
-                totalRows++;
-                String[] parts = line.split(",");
-                if (parts.length != 4) {
-                    // Handles invalid CSV format
-                    failCount++;
-                    failedRecords.add("ROW " + rowNum + ": Invalid format");
-                    rowNum++;
-                    continue;
-                }
-                String studentId = parts[0].trim();
-                String subjectName = parts[1].trim();
-                String subjectType = parts[2].trim();
-                String gradeStr = parts[3].trim();
-
-                Student student;
-                try {
-                    // Find student by ID, throws exception if not found
-                    student = studentService.findStudentById(studentId);
-                } catch (StudentNotFoundException e) {
-                    failCount++;
-                    failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
-                    rowNum++;
-                    continue;
-                }
-
-                Subject subject = studentService.findSubjectByNameAndType(subjectName, subjectType);
-                if (subject == null) {
-                    // Handles invalid subject scenario
-                    failCount++;
-                    failedRecords.add("ROW " + rowNum + ": Invalid subject (" + subjectName + ", " + subjectType + ")");
-                    rowNum++;
-                    continue;
-                }
-
-                int gradeValue;
-                try {
-                    gradeValue = Integer.parseInt(gradeStr);
-                    if (gradeValue < 0 || gradeValue > 100) {
-                        throw new InvalidGradeException(gradeValue);
+    
+        List<Map<String, String>> gradeRecords = new ArrayList<>();
+    
+        try {
+            if (format.equalsIgnoreCase("csv")) {
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String header = br.readLine(); // skip header
+                    String line;
+                    int rowNum = 2;
+                    while ((line = br.readLine()) != null) {
+                        totalRows++;
+                        String[] parts = line.split(",");
+                        if (parts.length != 4) {
+                            failCount++;
+                            failedRecords.add("ROW " + rowNum + ": Invalid format");
+                            rowNum++;
+                            continue;
+                        }
+                        Map<String, String> record = new HashMap<>();
+                        record.put("studentId", parts[0].trim());
+                        record.put("subjectName", parts[1].trim());
+                        record.put("subjectType", parts[2].trim());
+                        record.put("gradeStr", parts[3].trim());
+                        gradeRecords.add(record);
+                        rowNum++;
                     }
-                } catch (Exception e) {
-                    // Handles invalid grade value
-                    failCount++;
-                    failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
-                    rowNum++;
-                    continue;
                 }
-
-                // Check for duplicate grade and prompt user for overwrite
-                if (isDuplicateGrade(studentId, subjectName, subjectType)) {
-                    System.out.printf("ROW %d: Duplicate grade found for student %s and subject %s (%s). Overwrite with new value? [Y/N]: ", rowNum, studentId, subjectName, subjectType);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-                    String response = reader.readLine();
-                    if (response.equalsIgnoreCase("Y")) {
-                        updateGrade(studentId, subjectName, subjectType, gradeValue);
-                        successCount++;
-                        System.out.println("Grade updated with new value.");
-                    } else {
-                        failCount++;
-                        failedRecords.add("ROW " + rowNum + ": Duplicate grade not updated.");
+            } else if (format.equalsIgnoreCase("json")) {
+                // Assuming JSON is an array of objects with keys: studentId, subjectName, subjectType, gradeStr
+                StringBuilder jsonContent = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        jsonContent.append(line);
                     }
-                } else {
-                    // Record new grade if not duplicate
-                    Grade grade = new Grade(
-                            "GRD0" + (getGradeCount() + 1),
-                            studentId,
-                            subjectName,
-                            subjectType,
-                            gradeValue,
-                            new java.util.Date()
-                    );
-                    recordGrade(grade);
-                    successCount++;
                 }
-                rowNum++;
+                org.json.JSONArray arr = new org.json.JSONArray(jsonContent.toString());
+                totalRows = arr.length();
+                for (int i = 0; i < arr.length(); i++) {
+                    org.json.JSONObject obj = arr.getJSONObject(i);
+                    Map<String, String> record = new HashMap<>();
+                    record.put("studentId", obj.optString("studentId", "").trim());
+                    record.put("subjectName", obj.optString("subjectName", "").trim());
+                    record.put("subjectType", obj.optString("subjectType", "").trim());
+                    record.put("gradeStr", obj.optString("gradeStr", "").trim());
+                    gradeRecords.add(record);
+                }
+            } else {
+                System.out.println("Unsupported format: " + format);
+                return;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Error reading file: " + e.getMessage());
             return;
         }
-
+    
+        int rowNum = 2;
+        for (Map<String, String> record : gradeRecords) {
+            String studentId = record.get("studentId");
+            String subjectName = record.get("subjectName");
+            String subjectType = record.get("subjectType");
+            String gradeStr = record.get("gradeStr");
+    
+            Student student;
+            try {
+                student = studentService.findStudentById(studentId);
+            } catch (StudentNotFoundException e) {
+                failCount++;
+                failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
+                rowNum++;
+                continue;
+            }
+    
+            Subject subject = studentService.findSubjectByNameAndType(subjectName, subjectType);
+            if (subject == null) {
+                // Create and enroll subject for the student
+                if (subjectType.equalsIgnoreCase("Core Subject")) {
+                    subject = new CoreSubject(subjectName, subjectType);
+                } else if (subjectType.equalsIgnoreCase("Elective Subject")) {
+                    subject = new ElectiveSubject(subjectName, subjectType);
+                } else {
+                    failCount++;
+                    failedRecords.add("ROW " + rowNum + ": Invalid subject type (" + subjectType + ")");
+                    rowNum++;
+                    continue;
+                }
+                student.enrollSubject(subject);
+            }
+    
+            int gradeValue;
+            try {
+                gradeValue = Integer.parseInt(gradeStr);
+                if (gradeValue < 0 || gradeValue > 100) {
+                    throw new InvalidGradeException(gradeValue);
+                }
+            } catch (Exception e) {
+                failCount++;
+                failedRecords.add("ROW " + rowNum + ": " + e.getMessage());
+                rowNum++;
+                continue;
+            }
+    
+            // Check for duplicate grade and prompt user for overwrite
+            if (isDuplicateGrade(studentId, subjectName, subjectType)) {
+                System.out.printf("ROW %d: Duplicate grade found for student %s and subject %s (%s). Overwrite with new value? [Y/N]: ", rowNum, studentId, subjectName, subjectType);
+                Scanner scanner = new Scanner(System.in);
+                String response = scanner.nextLine();
+                if (response.equalsIgnoreCase("Y")) {
+                    updateGrade(studentId, subjectName, subjectType, gradeValue);
+                    successCount++;
+                    System.out.println("Grade updated with new value.");
+                } else {
+                    failCount++;
+                    failedRecords.add("ROW " + rowNum + ": Duplicate grade not updated.");
+                }
+            } else {
+                Grade grade = new Grade(
+                        "GRD0" + (getGradeCount() + 1),
+                        studentId,
+                        subjectName,
+                        subjectType,
+                        gradeValue,
+                        new java.util.Date()
+                );
+                recordGrade(grade, studentService);
+                successCount++;
+            }
+            rowNum++;
+        }
+    
         // Print import summary
         System.out.println("IMPORT SUMMARY");
         System.out.println("Total Rows: " + totalRows);
@@ -612,4 +626,3 @@ public class GradeService {
 
 
 }
-

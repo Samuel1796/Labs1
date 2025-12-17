@@ -1,6 +1,9 @@
 package models;
 
-public class ElectiveSubject implements Subject {
+import java.io.Serializable;
+
+public class ElectiveSubject implements Subject, Serializable {
+    private static final long serialVersionUID = 1L;
     private String subjectName;
     private String subjectCode;
 

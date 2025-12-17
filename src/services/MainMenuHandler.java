@@ -2,10 +2,12 @@ package services;
 
 import models.*;
 import exceptions.*;
+import utilities.FileIOUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -270,7 +272,7 @@ public class MainMenuHandler {
                             exportStudent = studentService.findStudentById(exportStudentID);
                             foundExport = true;
                         } catch (StudentNotFoundException e) {
-                            System.out.println("ERROR: " + e.getMessage());
+System.out.println("ERROR: " + e.getMessage());
                             System.out.print("Student not found. Try again? (Y/N): ");
                             String retry = sc.nextLine();
                             if (!retry.equalsIgnoreCase("Y")) {
@@ -320,7 +322,7 @@ public class MainMenuHandler {
                     try {
                         if (exportFormat == 4) {
                             gradeService.exportGradeReportMultiFormat(exportStudent, reportType, filename);
-                        } else if (exportFormat == 1) {
+} else if (exportFormat == 1) {
                             gradeService.exportGradesCSV(filename);
                         } else if (exportFormat == 2) {
                             gradeService.exportGradesJSON(filename);
@@ -330,6 +332,7 @@ public class MainMenuHandler {
                         System.out.println("Report exported successfully!");
                     } catch (Exception e) {
                         System.out.println("Export failed: " + e.getMessage());
+                        e.printStackTrace();
                     }
                     break;
 
@@ -343,39 +346,91 @@ public class MainMenuHandler {
                     int importFormat = Integer.parseInt(sc.nextLine());
                     System.out.print("Enter filename (without extension): ");
                     String importFilename = sc.nextLine().trim();
+
+                    int importedCount = 0;
+                    int duplicateCount = 0;
+                    List<String> errorMessages = new ArrayList<>();
+
                     try {
+                        List<Student> importedStudents = null;
                         switch (importFormat) {
                             case 1:
-                                studentService.importStudentsCSV(importFilename);
-                                System.out.println("Students imported from CSV.");
+                                importedStudents = FileIOUtils.readStudentsFromCSV(Paths.get("./imports/" + importFilename + ".csv"));
                                 break;
                             case 2:
-                                studentService.importStudentsJSON(importFilename);
-                                System.out.println("Students imported from JSON.");
+                                importedStudents = FileIOUtils.readStudentsFromJSON(Paths.get("./imports/" + importFilename + ".json"));
                                 break;
                             case 3:
-                                studentService.importStudentsBinary(importFilename);
-                                System.out.println("Students imported from binary.");
+                                importedStudents = FileIOUtils.readStudentsFromBinary(Paths.get("./imports/" + importFilename + ".bin"));
                                 break;
                             default:
                                 System.out.println("Invalid format.");
+                                break;
                         }
+                        if (importedStudents == null) {
+                            System.out.println("No students imported. Check file format and path.");
+                            break;
+                        }
+                        for (Student s : importedStudents) {
+                            try {
+                                studentService.addStudent(s);
+                                importedCount++;
+                            } catch (DuplicateStudentException e) {
+                                duplicateCount++;
+                                errorMessages.add("Duplicate: " + s.getName() + " (" + s.getEmail() + ")");
+                            } catch (Exception e) {
+                                errorMessages.add("Error importing " + s.getName() + ": " + e.getMessage());
+                            }
+                        }
+                        System.out.println("IMPORT SUMMARY");
+                        System.out.println("Total Students in File: " + importedStudents.size());
+                        System.out.println("Successfully Imported: " + importedCount);
+                        System.out.println("Duplicates Skipped: " + duplicateCount);
+                        if (!errorMessages.isEmpty()) {
+                            System.out.println("Errors:");
+                            for (String msg : errorMessages) {
+                                System.out.println(msg);
+                            }
+                        }
+                        System.out.println("Import completed!");
+                    } catch (IOException e) {
+                        System.out.println("File not found or could not be read: " + e.getMessage());
                     } catch (Exception e) {
                         System.out.println("Import failed: " + e.getMessage());
+                        e.printStackTrace();
                     }
                     break;
 
 //                    BULK IMPORT
                 case 7:
-                    System.out.println("BULK IMPORT GRADES");
-                    System.out.println("_______________________________");
-                    System.out.println("Place your CSV file in: ./imports/");
-                    System.out.println("CSV Format Required:");
-                    System.out.println("StudentID,SubjectName,SubjectType,Grade");
-                    System.out.println("Example: STU001,Mathematics,Core,85");
+                    System.out.println("IMPORT GRADES");
+                    System.out.println("1. CSV");
+                    System.out.println("2. JSON");
+                    System.out.print("Select format (1-2): ");
+                    int gradeImportFormat = -1;
+                    while (gradeImportFormat != 1 && gradeImportFormat != 2) {
+                        try {
+                            gradeImportFormat = Integer.parseInt(sc.nextLine());
+                            if (gradeImportFormat != 1 && gradeImportFormat != 2) {
+                                System.out.println("Invalid selection. Please enter 1 or 2.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Please enter 1 or 2.");
+                        }
+                    }
+                    String formatStr = (gradeImportFormat == 1) ? "csv" : "json";
                     System.out.print("Enter filename (without extension): ");
-                     importFilename = sc.nextLine().trim();
-                    gradeService.bulkImportGrades(importFilename, studentService);
+                    String gradeImportFilename = sc.nextLine().trim();
+                    if (gradeImportFilename.isEmpty()) {
+                        System.out.println("Filename cannot be empty.");
+                        break;
+                    }
+                    try {
+                        gradeService.bulkImportGrades(gradeImportFilename, formatStr, studentService);
+                    } catch (Exception e) {
+                        System.out.println("Grade import failed: " + e.getMessage());
+                        e.printStackTrace();
+                    }
                     break;
 
 

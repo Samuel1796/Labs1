@@ -1,0 +1,22 @@
+[
+  {
+    "studentID": "STU001",
+    "name": "John Doe",
+    "age": 20,
+    "email": "john.doe@example.com",
+    "phone": "0123456789",
+    "status": "Active",
+    "passingGrade": 50,
+    "honorsEligible": false
+  },
+  {
+    "studentID": "STU002",
+    "name": "Jane Smith",
+    "age": 22,
+    "email": "jane.smith@example.com",
+    "phone": "0987654321",
+    "status": "Active",
+    "passingGrade": 60,
+    "honorsEligible": true
+  }
+]

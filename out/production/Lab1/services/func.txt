@@ -1,0 +1,247 @@
+case 11:
+    try {
+        System.out.println("GENERATE BATCH REPORTS");
+        System.out.println("_______________________________________________");
+        System.out.println();
+
+        // Report Scope
+        System.out.println("Report Scope:");
+        System.out.println("1. All Students (" + studentManager.getStudentCount() + " students)");
+        System.out.println("2. By Student Type (Regular/Honors)");
+        System.out.println("3. By Grade Range");
+        System.out.println("4. Custom Selection");
+        System.out.println();
+
+        System.out.print("Select scope (1-4): ");
+        int scopeChoice;
+        try {
+            scopeChoice = scanner.nextInt();
+            scanner.nextLine();
+        } catch (InputMismatchException e) {
+            System.out.println("\nX ERROR: InvalidMenuChoiceException\n   Please enter a valid number (1-4).\n");
+            scanner.nextLine();
+            break;
+        }
+
+        System.out.println();
+        System.out.println("Report Format:");
+        System.out.println("1. CSV (Comma-Separated Values)");
+        System.out.println("2. JSON (JavaScript Object Notation)");
+        System.out.println("3. Binary (Serialized Java Object)");
+        System.out.println("4. All formats");
+        System.out.println();
+
+        System.out.print("Select format (1-4): ");
+        int formatChoice;
+        try {
+            formatChoice = scanner.nextInt();
+            scanner.nextLine();
+        } catch (InputMismatchException e) {
+            System.out.println("\nX ERROR: InvalidMenuChoiceException\n   Please enter a valid number (1-4).\n");
+            scanner.nextLine();
+            break;
+        }
+
+        System.out.println();
+        System.out.println("Report Type:");
+        System.out.println("1. Summary Report");
+        System.out.println("2. Detailed Report");
+        System.out.println("3. Transcript Format");
+        System.out.println("4. Performance Analytics");
+        System.out.println();
+
+        System.out.print("Select type (1-4): ");
+        int reportTypeChoice;
+        try {
+            reportTypeChoice = scanner.nextInt();
+            scanner.nextLine();
+        } catch (InputMismatchException e) {
+            System.out.println("\nX ERROR: InvalidMenuChoiceException\n   Please enter a valid number (1-4).\n");
+            scanner.nextLine();
+            break;
+        }
+
+        String reportType;
+        switch (reportTypeChoice) {
+            case 1: reportType = "Summary Report"; break;
+            case 2: reportType = "Detailed Report"; break;
+            case 3: reportType = "Transcript Format"; break;
+            case 4: reportType = "Performance Analytics"; break;
+            default: reportType = "Detailed Report"; break;
+        }
+
+        System.out.println();
+        System.out.println("Concurrency Settings:");
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        System.out.println("Available Processors: " + availableProcessors);
+        int recommendedMin = Math.max(2, availableProcessors / 2);
+        int recommendedMax = Math.min(8, availableProcessors);
+        System.out.println("Recommended Threads: " + recommendedMin + "-" + recommendedMax);
+        System.out.println();
+
+        System.out.print("Enter number of threads (1-8): ");
+        int threadCount;
+        try {
+            threadCount = scanner.nextInt();
+            scanner.nextLine();
+            if (threadCount < 1 || threadCount > 8) {
+                throw new InvalidMenuChoiceException(
+                    "X ERROR: InvalidMenuChoiceException\n   Thread count must be between 1 and 8.\n   You entered: " + threadCount
+                );
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("\nX ERROR: InvalidMenuChoiceException\n   Please enter a valid number (1-8).\n");
+            scanner.nextLine();
+            break;
+        }
+
+        System.out.println();
+        System.out.println("Initializing thread pool...");
+
+        // Initialize batch generator
+        BatchReportGenerator batchGenerator = new BatchReportGenerator(studentManager, gradeManager);
+        if (!batchGenerator.initializeThreadPool(threadCount)) {
+            System.out.println("X ERROR: Failed to initialize thread pool\n");
+            break;
+        }
+        // Register thread pool with performance monitor
+        if (batchGenerator.getExecutorService() != null) {
+            performanceMonitor.registerThreadPool("FixedThreadPool",
+                batchGenerator.getExecutorService(), batchGenerator.getMaxThreadCount());
+        }
+        System.out.println("✓ Fixed Thread Pool created: " + threadCount + " threads");
+        System.out.println();
+
+        // Get students based on scope
+        List<Student> studentsToProcess = new ArrayList<>();
+        switch (scopeChoice) {
+            case 1:
+                studentsToProcess = studentManager.getStudentsList();
+                break;
+            case 2:
+                System.out.println("Student Type:");
+                System.out.println("1. Regular Student");
+                System.out.println("2. Honors Student");
+                System.out.println();
+                System.out.print("Select type (1-2): ");
+                int typeChoice = scanner.nextInt();
+                scanner.nextLine();
+                String selectedType = (typeChoice == 1) ? "Regular" : "Honors";
+                for (Student s : studentManager.getStudentsList()) {
+                    if (s.getStudentType().equals(selectedType)) {
+                        studentsToProcess.add(s);
+                    }
+                }
+                break;
+            case 3:
+                System.out.print("Enter minimum grade average: ");
+                double minGrade = scanner.nextDouble();
+                scanner.nextLine();
+                System.out.print("Enter maximum grade average: ");
+                double maxGrade = scanner.nextDouble();
+                scanner.nextLine();
+                for (Student s : studentManager.getStudentsList()) {
+                    double avg = s.calculateAverageGrade();
+                    if (avg >= minGrade && avg <= maxGrade) {
+                        studentsToProcess.add(s);
+                    }
+                }
+                break;
+            case 4:
+                System.out.println("Enter student IDs (comma-separated): ");
+                String idsInput = scanner.nextLine();
+                String[] ids = idsInput.split(",");
+                for (String id : ids) {
+                    try {
+                        Student s = studentManager.findStudent(id.trim());
+                        if (s != null) {
+                            studentsToProcess.add(s);
+                        }
+                    } catch (StudentNotFoundException e) {
+                        // Skip invalid IDs
+                    }
+                }
+                break;
+            default:
+                System.out.println("X ERROR: Invalid scope choice\n");
+                break;
+        }
+
+        if (studentsToProcess.isEmpty()) {
+            System.out.println("X ERROR: No students selected for batch processing\n");
+            batchGenerator.shutdown(5);
+            break;
+        }
+
+        System.out.println("Processing " + studentsToProcess.size() + " student reports...");
+        System.out.println();
+
+        // Generate batch reports
+        BatchReportGenerator.BatchResult result = batchGenerator.generateBatchReports(
+            studentsToProcess, reportType, formatChoice
+        );
+
+        // Shutdown thread pool
+        batchGenerator.shutdown(5);
+
+        // Display results
+        System.out.println();
+        System.out.println("✓ BATCH GENERATION COMPLETED!");
+        System.out.println();
+        System.out.println("EXECUTION SUMMARY");
+        System.out.println("_______________________________________________");
+        System.out.println("Total Reports: " + result.getTotalReports());
+        System.out.println("Successful: " + result.getSuccessful());
+        System.out.println("Failed: " + result.getFailed());
+        System.out.println("Total Time: " + String.format("%.1f", result.getTotalTime() / 1000.0) + " seconds");
+        System.out.println("Avg Time per Report: " + String.format("%.0f", result.getAvgTimePerReport()) + "ms");
+        System.out.println("Sequential Processing (estimated): " +
+            String.format("%.0f", result.getEstimatedSequential() / 1000.0) + " seconds");
+        System.out.println("Concurrent Processing (actual): " +
+            String.format("%.1f", result.getTotalTime() / 1000.0) + " seconds");
+        double performanceGain = result.getEstimatedSequential() > 0 ?
+            (double)result.getEstimatedSequential() / result.getTotalTime() : 1.0;
+        System.out.println("Performance Gain: " + String.format("%.1f", performanceGain) + "x faster");
+        System.out.println();
+
+        BatchReportGenerator.ThreadPoolStats stats = batchGenerator.getThreadPoolStats();
+        System.out.println("Thread Pool Statistics:");
+        System.out.println("Peak Thread Count: " + stats.getPoolSize());
+        System.out.println("Total Tasks Executed: " + result.getTotalReports());
+        System.out.println("Average Queue Time: " + String.format("%.0f", 0.0) + "ms");
+        System.out.println("Thread Utilization: " + String.format("%.1f", stats.getThreadUtilization()) + "%");
+        System.out.println();
+
+        System.out.println("Output Location: " + result.getOutputDir());
+        System.out.println("Total Files Generated: " + result.getSuccessful());
+        try {
+            long totalSize = java.nio.file.Files.walk(result.getOutputDir())
+                .filter(java.nio.file.Files::isRegularFile)
+                .mapToLong(p -> {
+                    try {
+                        return java.nio.file.Files.size(p);
+                    } catch (java.io.IOException e) {
+                        return 0;
+                    }
+                })
+                .sum();
+            System.out.println("Total Size: " + formatFileSize(totalSize));
+        } catch (java.io.IOException e) {
+            // Ignore size calculation error
+        }
+        System.out.println();
+
+    } catch (InvalidMenuChoiceException e) {
+        System.out.println();
+        System.out.println(e.getMessage());
+        System.out.println();
+    } catch (Exception e) {
+        System.out.println();
+        System.out.println("X ERROR: " + e.getClass().getSimpleName() + "\n   " + e.getMessage());
+        System.out.println();
+    }
+    break;
+
+
+
+

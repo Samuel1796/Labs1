@@ -5,11 +5,10 @@ import exceptions.DuplicateStudentException;
 import exceptions.StudentNotFoundException;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
+
 import utilities.FileIOUtils;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * Service class for managing student data.
@@ -147,20 +146,25 @@ public class StudentService {
         System.out.println("________________________________________________________________________________________________________________________________________________");
         System.out.println("| STUDENT ID  | NAME                  | TYPE            | AVG GRADE | STATUS       | ENROLLED SUBJECTS    | PASSING GRADE | Honors Eligible     |");
         System.out.println("|_______________________________________________________________________________________________________________________________________________|");
-
-        for (Student student : studentMap.values()) {
+    
+        // Sort students by Student ID
+        List<Student> sortedStudents = new ArrayList<>(studentMap.values());
+        sortedStudents.sort(Comparator.comparing(Student::getStudentID, String.CASE_INSENSITIVE_ORDER));
+    
+        for (Student student : sortedStudents) {
             String typeStr = (student instanceof HonorsStudent) ? "Honors" : "Regular";
             double avg = student.calculateAverage(gradeService);
             System.out.printf("| %-10s | %-20s | %-15s | %-9.1f | %-12s | %-20s | %-13d | %-18s |%n",
                     student.getStudentID(),
                     student.getName(),
-                    (student instanceof HonorsStudent) ? "Honors" : "Regular",
+                    typeStr,
                     avg,
                     student.getStatus(),
-                    (student.getEnrolledSubjects() != null ? student.getEnrolledSubjects().size() : 0),                    student.getPassingGrade(),
+                    (student.getEnrolledSubjects() != null ? student.getEnrolledSubjects().size() : 0),
+                    student.getPassingGrade(),
                     (student instanceof HonorsStudent ? ((HonorsStudent)student).isHonorsEligible(gradeService) : student.isHonorsEligible(gradeService)) ? "Yes" : "No");
         }
-
+    
         System.out.println("|=============================================================================================================================================|");
     }
 
@@ -178,9 +182,17 @@ public class StudentService {
 
     public void importStudentsCSV(String filename) throws IOException {
         List<Student> imported = FileIOUtils.readStudentsFromCSV(Paths.get("./imports/" + filename + ".csv"));
+        int importedCount = 0, duplicateCount = 0;
         for (Student s : imported) {
+            String normalizedId = s.getStudentID().toUpperCase();
+            if (studentMap.containsKey(normalizedId) || isDuplicateStudent(s.getName(), s.getEmail())) {
+                duplicateCount++;
+                continue;
+            }
             addStudent(s);
+            importedCount++;
         }
+        System.out.printf("Import completed: %d students imported, %d duplicates skipped.%n", importedCount, duplicateCount);
     }
 
     public void exportStudentsJSON(String filename) throws IOException {
@@ -189,9 +201,17 @@ public class StudentService {
 
     public void importStudentsJSON(String filename) throws IOException {
         List<Student> imported = FileIOUtils.readStudentsFromJSON(Paths.get("./imports/" + filename + ".json"));
+        int importedCount = 0, duplicateCount = 0;
         for (Student s : imported) {
+            String normalizedId = s.getStudentID().toUpperCase();
+            if (studentMap.containsKey(normalizedId) || isDuplicateStudent(s.getName(), s.getEmail())) {
+                duplicateCount++;
+                continue;
+            }
             addStudent(s);
+            importedCount++;
         }
+        System.out.printf("Import completed: %d students imported, %d duplicates skipped.%n", importedCount, duplicateCount);
     }
 
     public void exportStudentsBinary(String filename) throws IOException {
@@ -200,8 +220,16 @@ public class StudentService {
 
     public void importStudentsBinary(String filename) throws IOException, ClassNotFoundException {
         List<Student> imported = FileIOUtils.readStudentsFromBinary(Paths.get("./imports/" + filename + ".bin"));
+        int importedCount = 0, duplicateCount = 0;
         for (Student s : imported) {
+            String normalizedId = s.getStudentID().toUpperCase();
+            if (studentMap.containsKey(normalizedId) || isDuplicateStudent(s.getName(), s.getEmail())) {
+                duplicateCount++;
+                continue;
+            }
             addStudent(s);
+            importedCount++;
         }
+        System.out.printf("Import completed: %d students imported, %d duplicates skipped.%n", importedCount, duplicateCount);
     }
 }

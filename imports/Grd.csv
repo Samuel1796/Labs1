@@ -1,0 +1,261 @@
+studentId,subjectName,subjectType,gradeStr
+STU001,Mathematics,Core Subject,85
+STU001,English,Core Subject,78
+STU001,Science,Core Subject,92
+STU001,Art,Elective Subject,88
+STU001,Physical Education,Elective Subject,95
+STU002,Mathematics,Core Subject,78
+STU002,English,Core Subject,82
+STU002,Science,Core Subject,85
+STU002,Art,Elective Subject,90
+STU002,Physical Education,Elective Subject,88
+STU003,Mathematics,Core Subject,80
+STU003,English,Core Subject,75
+STU003,Science,Core Subject,88
+STU003,Art,Elective Subject,70
+STU003,Physical Education,Elective Subject,92
+STU004,Mathematics,Core Subject,65
+STU004,English,Core Subject,70
+STU004,Science,Core Subject,68
+STU004,Art,Elective Subject,85
+STU004,Physical Education,Elective Subject,80
+STU005,Mathematics,Core Subject,95
+STU005,English,Core Subject,92
+STU005,Science,Core Subject,98
+STU005,Art,Elective Subject,90
+STU005,Physical Education,Elective Subject,88
+STU006,Mathematics,Core Subject,100
+STU006,English,Core Subject,96
+STU006,Science,Core Subject,99
+STU006,Art,Elective Subject,94
+STU006,Physical Education,Elective Subject,97
+STU007,Mathematics,Core Subject,72
+STU007,English,Core Subject,68
+STU007,Science,Core Subject,70
+STU007,Art,Elective Subject,75
+STU007,Physical Education,Elective Subject,78
+STU008,Mathematics,Core Subject,83
+STU008,English,Core Subject,80
+STU008,Science,Core Subject,82
+STU008,Art,Elective Subject,88
+STU008,Physical Education,Elective Subject,85
+STU009,Mathematics,Core Subject,88
+STU009,English,Core Subject,85
+STU009,Science,Core Subject,90
+STU009,Art,Elective Subject,82
+STU009,Physical Education,Elective Subject,87
+STU010,Mathematics,Core Subject,92
+STU010,English,Core Subject,89
+STU010,Science,Core Subject,94
+STU010,Art,Elective Subject,85
+STU010,Physical Education,Elective Subject,90
+STU011,Mathematics,Core Subject,87
+STU011,English,Core Subject,84
+STU011,Science,Core Subject,89
+STU011,Art,Elective Subject,91
+STU011,Physical Education,Elective Subject,86
+STU012,Mathematics,Core Subject,90
+STU012,English,Core Subject,88
+STU012,Science,Core Subject,92
+STU012,Art,Elective Subject,87
+STU012,Physical Education,Elective Subject,89
+STU013,Mathematics,Core Subject,76
+STU013,English,Core Subject,79
+STU013,Science,Core Subject,81
+STU013,Art,Elective Subject,84
+STU013,Physical Education,Elective Subject,80
+STU014,Mathematics,Core Subject,85
+STU014,English,Core Subject,82
+STU014,Science,Core Subject,87
+STU014,Art,Elective Subject,79
+STU014,Physical Education,Elective Subject,83
+STU015,Mathematics,Core Subject,70
+STU015,English,Core Subject,73
+STU015,Science,Core Subject,75
+STU015,Art,Elective Subject,80
+STU015,Physical Education,Elective Subject,78
+STU016,Mathematics,Core Subject,74
+STU016,English,Core Subject,77
+STU016,Science,Core Subject,79
+STU016,Art,Elective Subject,82
+STU016,Physical Education,Elective Subject,81
+STU017,Mathematics,Core Subject,93
+STU017,English,Core Subject,90
+STU017,Science,Core Subject,95
+STU017,Art,Elective Subject,88
+STU017,Physical Education,Elective Subject,92
+STU018,Mathematics,Core Subject,68
+STU018,English,Core Subject,65
+STU018,Science,Core Subject,70
+STU018,Art,Elective Subject,75
+STU018,Physical Education,Elective Subject,72
+STU019,Mathematics,Core Subject,60
+STU019,English,Core Subject,62
+STU019,Science,Core Subject,65
+STU019,Art,Elective Subject,70
+STU019,Physical Education,Elective Subject,68
+STU020,Mathematics,Core Subject,78
+STU020,English,Core Subject,75
+STU020,Science,Core Subject,80
+STU020,Art,Elective Subject,82
+STU020,Physical Education,Elective Subject,79
+STU021,Mathematics,Core Subject,91
+STU021,English,Core Subject,89
+STU021,Science,Core Subject,93
+STU021,Art,Elective Subject,95
+STU021,Physical Education,Elective Subject,90
+STU022,Mathematics,Core Subject,82
+STU022,English,Core Subject,80
+STU022,Science,Core Subject,85
+STU022,Art,Elective Subject,78
+STU022,Physical Education,Elective Subject,83
+STU023,Mathematics,Core Subject,75
+STU023,English,Core Subject,72
+STU023,Science,Core Subject,77
+STU023,Art,Elective Subject,80
+STU023,Physical Education,Elective Subject,76
+STU024,Mathematics,Core Subject,55
+STU024,English,Core Subject,58
+STU024,Science,Core Subject,60
+STU024,Art,Elective Subject,65
+STU024,Physical Education,Elective Subject,62
+STU025,Mathematics,Core Subject,86
+STU025,English,Core Subject,84
+STU025,Science,Core Subject,88
+STU025,Art,Elective Subject,82
+STU025,Physical Education,Elective Subject,87
+STU026,Mathematics,Core Subject,62
+STU026,English,Core Subject,65
+STU026,Science,Core Subject,68
+STU026,Art,Elective Subject,72
+STU026,Physical Education,Elective Subject,70
+STU027,Mathematics,Core Subject,81
+STU027,English,Core Subject,79
+STU027,Science,Core Subject,83
+STU027,Art,Elective Subject,85
+STU027,Physical Education,Elective Subject,80
+STU028,Mathematics,Core Subject,94
+STU028,English,Core Subject,91
+STU028,Science,Core Subject,96
+STU028,Art,Elective Subject,89
+STU028,Physical Education,Elective Subject,93
+STU029,Mathematics,Core Subject,58
+STU029,English,Core Subject,60
+STU029,Science,Core Subject,62
+STU029,Art,Elective Subject,67
+STU029,Physical Education,Elective Subject,64
+STU030,Mathematics,Core Subject,89
+STU030,English,Core Subject,87
+STU030,Science,Core Subject,91
+STU030,Art,Elective Subject,84
+STU030,Physical Education,Elective Subject,88
+STU031,Mathematics,Core Subject,50
+STU031,English,Core Subject,52
+STU031,Science,Core Subject,55
+STU031,Art,Elective Subject,60
+STU031,Physical Education,Elective Subject,58
+STU032,Mathematics,Core Subject,67
+STU032,English,Core Subject,70
+STU032,Science,Core Subject,72
+STU032,Art,Elective Subject,75
+STU032,Physical Education,Elective Subject,71
+STU033,Mathematics,Core Subject,99
+STU033,English,Core Subject,97
+STU033,Science,Core Subject,100
+STU033,Art,Elective Subject,95
+STU033,Physical Education,Elective Subject,98
+STU034,Mathematics,Core Subject,73
+STU034,English,Core Subject,76
+STU034,Science,Core Subject,78
+STU034,Art,Elective Subject,81
+STU034,Physical Education,Elective Subject,77
+STU035,Mathematics,Core Subject,92
+STU035,English,Core Subject,90
+STU035,Science,Core Subject,94
+STU035,Art,Elective Subject,88
+STU035,Physical Education,Elective Subject,91
+STU036,Mathematics,Core Subject,54
+STU036,English,Core Subject,57
+STU036,Science,Core Subject,59
+STU036,Art,Elective Subject,63
+STU036,Physical Education,Elective Subject,61
+STU037,Mathematics,Core Subject,48
+STU037,English,Core Subject,51
+STU037,Science,Core Subject,53
+STU037,Art,Elective Subject,58
+STU037,Physical Education,Elective Subject,56
+STU038,Mathematics,Core Subject,84
+STU038,English,Core Subject,82
+STU038,Science,Core Subject,86
+STU038,Art,Elective Subject,80
+STU038,Physical Education,Elective Subject,85
+STU039,Mathematics,Core Subject,69
+STU039,English,Core Subject,72
+STU039,Science,Core Subject,74
+STU039,Art,Elective Subject,77
+STU039,Physical Education,Elective Subject,73
+STU040,Mathematics,Core Subject,61
+STU040,English,Core Subject,64
+STU040,Science,Core Subject,66
+STU040,Art,Elective Subject,70
+STU040,Physical Education,Elective Subject,68
+STU041,Mathematics,Core Subject,45
+STU041,English,Core Subject,48
+STU041,Science,Core Subject,50
+STU041,Art,Elective Subject,55
+STU041,Physical Education,Elective Subject,53
+STU042,Mathematics,Core Subject,79
+STU042,English,Core Subject,77
+STU042,Science,Core Subject,81
+STU042,Art,Elective Subject,83
+STU042,Physical Education,Elective Subject,80
+STU043,Mathematics,Core Subject,87
+STU043,English,Core Subject,85
+STU043,Science,Core Subject,89
+STU043,Art,Elective Subject,82
+STU043,Physical Education,Elective Subject,86
+STU044,Mathematics,Core Subject,71
+STU044,English,Core Subject,74
+STU044,Science,Core Subject,76
+STU044,Art,Elective Subject,79
+STU044,Physical Education,Elective Subject,75
+STU045,Mathematics,Core Subject,93
+STU045,English,Core Subject,91
+STU045,Science,Core Subject,95
+STU045,Art,Elective Subject,89
+STU045,Physical Education,Elective Subject,92
+STU046,Mathematics,Core Subject,59
+STU046,English,Core Subject,62
+STU046,Science,Core Subject,64
+STU046,Art,Elective Subject,68
+STU046,Physical Education,Elective Subject,66
+STU047,Mathematics,Core Subject,66
+STU047,English,Core Subject,69
+STU047,Science,Core Subject,71
+STU047,Art,Elective Subject,74
+STU047,Physical Education,Elective Subject,70
+STU048,Mathematics,Core Subject,94
+STU048,English,Core Subject,92
+STU048,Science,Core Subject,96
+STU048,Art,Elective Subject,90
+STU048,Physical Education,Elective Subject,93
+STU049,Mathematics,Core Subject,63
+STU049,English,Core Subject,66
+STU049,Science,Core Subject,69
+STU049,Art,Elective Subject,72
+STU049,Physical Education,Elective Subject,71
+STU050,Mathematics,Core Subject,77
+STU050,English,Core Subject,80
+STU050,Science,Core Subject,82
+STU050,Art,Elective Subject,85
+STU050,Physical Education,Elective Subject,81
+STU051,Mathematics,Core Subject,91
+STU051,English,Core Subject,89
+STU051,Science,Core Subject,93
+STU051,Art,Elective Subject,87
+STU051,Physical Education,Elective Subject,90
+STU052,Mathematics,Core Subject,88
+STU052,English,Core Subject,86
+STU052,Science,Core Subject,90
+STU052,Art,Elective Subject,84
+STU052,Physical Education,Elective Subject,89
