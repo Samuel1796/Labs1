@@ -1,5 +1,10 @@
 import models.*;
-import services.*;
+import services.student.StudentService;
+import services.file.GradeService;
+import services.file.BatchReportTaskManager;
+import services.menu.MenuService;
+import services.menu.MainMenuHandler;
+import services.analytics.StatisticsService;
 import exceptions.*;
 import java.io.IOException;
 import java.util.*;
@@ -47,7 +52,9 @@ public class Main {
         String outputDir = "./reports/batch_2025-12-17/";
         int threadCount = 4;
         
-        BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeService, format, outputDir, threadCount);
+        // Note: BatchReportTaskManager requires GradeImportExportService
+        services.file.GradeImportExportService gradeImportExportService = new services.file.GradeImportExportService(gradeService);
+        BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeImportExportService, format, outputDir, threadCount);
         batchManager.startBatchExport();
         while (batchManager.isRunning()) {
             System.out.println("Background tasks running: " + batchManager.getActiveTasks());
@@ -60,13 +67,6 @@ public class Main {
             }
         }
         while (running) {
-            // Show background task status before menu
-            if (menuHandler.getBatchManager() != null && menuHandler.getBatchManager().isRunning()) {
-                System.out.println("Background Tasks: " + menuHandler.getBatchManager().getActiveTasks() + " active");
-            } else {
-                System.out.println("No background tasks are running.");
-            }
-
             menuService.displayMainMenu();
 
             int choice = sc.nextInt();
