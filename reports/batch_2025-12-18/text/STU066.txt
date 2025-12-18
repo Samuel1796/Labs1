@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU066 - Adwoa Sackey
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0326  18-12-2025 Mathematics          Core Subject    94.0    
+GRD0327  18-12-2025 English              Core Subject    92.0    
+GRD0328  18-12-2025 Science              Core Subject    96.0    
+GRD0329  18-12-2025 Art                  Elective Subject 88.0    
+GRD0330  18-12-2025 Physical Education   Elective Subject 94.0    
+
+SUMMARY
+-------
+Average: 92.8%
+Passing Grade: 50%
+Status: PASSING

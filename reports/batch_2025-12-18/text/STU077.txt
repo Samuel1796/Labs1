@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU077 - Yaa Ghartey
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0381  18-12-2025 Mathematics          Core Subject    53.0    
+GRD0382  18-12-2025 English              Core Subject    55.0    
+GRD0383  18-12-2025 Science              Core Subject    51.0    
+GRD0384  18-12-2025 Art                  Elective Subject 58.0    
+GRD0385  18-12-2025 Physical Education   Elective Subject 62.0    
+
+SUMMARY
+-------
+Average: 55.8%
+Passing Grade: 50%
+Status: PASSING

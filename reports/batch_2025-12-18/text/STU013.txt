@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU013 - Kojo Adu
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD061   18-12-2025 Mathematics          Core Subject    88.0    
+GRD062   18-12-2025 English              Core Subject    85.0    
+GRD063   18-12-2025 Science              Core Subject    90.0    
+GRD064   18-12-2025 Art                  Elective Subject 82.0    
+GRD065   18-12-2025 Physical Education   Elective Subject 88.0    
+
+SUMMARY
+-------
+Average: 86.6%
+Passing Grade: 50%
+Status: PASSING

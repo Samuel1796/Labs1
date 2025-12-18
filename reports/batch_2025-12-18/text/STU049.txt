@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU049 - Ama Asiedu
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0241  18-12-2025 Mathematics          Core Subject    78.0    
+GRD0242  18-12-2025 English              Core Subject    76.0    
+GRD0243  18-12-2025 Science              Core Subject    80.0    
+GRD0244  18-12-2025 Art                  Elective Subject 75.0    
+GRD0245  18-12-2025 Physical Education   Elective Subject 80.0    
+
+SUMMARY
+-------
+Average: 77.8%
+Passing Grade: 50%
+Status: PASSING

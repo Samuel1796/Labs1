@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU044 - Esi Tetteh
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0216  18-12-2025 Mathematics          Core Subject    60.0    
+GRD0217  18-12-2025 English              Core Subject    62.0    
+GRD0218  18-12-2025 Science              Core Subject    58.0    
+GRD0219  18-12-2025 Art                  Elective Subject 65.0    
+GRD0220  18-12-2025 Physical Education   Elective Subject 68.0    
+
+SUMMARY
+-------
+Average: 62.6%
+Passing Grade: 50%
+Status: PASSING

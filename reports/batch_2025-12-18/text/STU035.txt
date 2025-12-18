@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU035 - Akwasi Hammond
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0171  18-12-2025 Mathematics          Core Subject    47.0    
+GRD0172  18-12-2025 English              Core Subject    49.0    
+GRD0173  18-12-2025 Science              Core Subject    45.0    
+GRD0174  18-12-2025 Art                  Elective Subject 52.0    
+GRD0175  18-12-2025 Physical Education   Elective Subject 55.0    
+
+SUMMARY
+-------
+Average: 49.6%
+Passing Grade: 50%
+Status: FAILING

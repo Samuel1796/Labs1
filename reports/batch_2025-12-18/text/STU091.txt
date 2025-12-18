@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU091 - Abena Wilson
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0451  18-12-2025 Mathematics          Core Subject    79.0    
+GRD0452  18-12-2025 English              Core Subject    77.0    
+GRD0453  18-12-2025 Science              Core Subject    81.0    
+GRD0454  18-12-2025 Art                  Elective Subject 76.0    
+GRD0455  18-12-2025 Physical Education   Elective Subject 80.0    
+
+SUMMARY
+-------
+Average: 78.6%
+Passing Grade: 50%
+Status: PASSING

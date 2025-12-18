@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU014 - Esi Afful
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD066   18-12-2025 Mathematics          Core Subject    58.0    
+GRD067   18-12-2025 English              Core Subject    60.0    
+GRD068   18-12-2025 Science              Core Subject    55.0    
+GRD069   18-12-2025 Art                  Elective Subject 62.0    
+GRD070   18-12-2025 Physical Education   Elective Subject 65.0    
+
+SUMMARY
+-------
+Average: 60.0%
+Passing Grade: 50%
+Status: PASSING

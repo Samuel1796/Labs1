@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU053 - Afia Danso
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0261  18-12-2025 Mathematics          Core Subject    70.0    
+GRD0262  18-12-2025 English              Core Subject    68.0    
+GRD0263  18-12-2025 Science              Core Subject    72.0    
+GRD0264  18-12-2025 Art                  Elective Subject 75.0    
+GRD0265  18-12-2025 Physical Education   Elective Subject 78.0    
+
+SUMMARY
+-------
+Average: 72.6%
+Passing Grade: 50%
+Status: PASSING

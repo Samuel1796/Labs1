@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU022 - Yaw Asante
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0106  18-12-2025 Mathematics          Core Subject    73.0    
+GRD0107  18-12-2025 English              Core Subject    75.0    
+GRD0108  18-12-2025 Science              Core Subject    70.0    
+GRD0109  18-12-2025 Art                  Elective Subject 78.0    
+GRD0110  18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 75.6%
+Passing Grade: 50%
+Status: PASSING

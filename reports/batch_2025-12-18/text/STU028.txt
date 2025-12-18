@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU028 - Kojo Darko
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0136  18-12-2025 Mathematics          Core Subject    66.0    
+GRD0137  18-12-2025 English              Core Subject    68.0    
+GRD0138  18-12-2025 Science              Core Subject    64.0    
+GRD0139  18-12-2025 Art                  Elective Subject 70.0    
+GRD0140  18-12-2025 Physical Education   Elective Subject 72.0    
+
+SUMMARY
+-------
+Average: 68.0%
+Passing Grade: 50%
+Status: PASSING

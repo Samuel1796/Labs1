@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU086 - Kwabena Pappoe
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0426  18-12-2025 Mathematics          Core Subject    61.0    
+GRD0427  18-12-2025 English              Core Subject    63.0    
+GRD0428  18-12-2025 Science              Core Subject    59.0    
+GRD0429  18-12-2025 Art                  Elective Subject 65.0    
+GRD0430  18-12-2025 Physical Education   Elective Subject 68.0    
+
+SUMMARY
+-------
+Average: 63.2%
+Passing Grade: 50%
+Status: PASSING

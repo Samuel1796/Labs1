@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU075 - Kwaku Ewusi
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0371  18-12-2025 Mathematics          Core Subject    82.0    
+GRD0372  18-12-2025 English              Core Subject    80.0    
+GRD0373  18-12-2025 Science              Core Subject    84.0    
+GRD0374  18-12-2025 Art                  Elective Subject 78.0    
+GRD0375  18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 81.2%
+Passing Grade: 50%
+Status: PASSING

@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU019 - Ama Ampofo
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD091   18-12-2025 Mathematics          Core Subject    92.0    
+GRD092   18-12-2025 English              Core Subject    90.0    
+GRD093   18-12-2025 Science              Core Subject    95.0    
+GRD094   18-12-2025 Art                  Elective Subject 88.0    
+GRD095   18-12-2025 Physical Education   Elective Subject 92.0    
+
+SUMMARY
+-------
+Average: 91.4%
+Passing Grade: 50%
+Status: PASSING

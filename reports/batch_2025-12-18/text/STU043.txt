@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU043 - Kojo Sarkodie
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0211  18-12-2025 Mathematics          Core Subject    67.0    
+GRD0212  18-12-2025 English              Core Subject    69.0    
+GRD0213  18-12-2025 Science              Core Subject    65.0    
+GRD0214  18-12-2025 Art                  Elective Subject 70.0    
+GRD0215  18-12-2025 Physical Education   Elective Subject 72.0    
+
+SUMMARY
+-------
+Average: 68.6%
+Passing Grade: 50%
+Status: PASSING

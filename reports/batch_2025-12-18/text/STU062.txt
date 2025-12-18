@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU062 - Yaa Nti
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0306  18-12-2025 Mathematics          Core Subject    65.0    
+GRD0307  18-12-2025 English              Core Subject    67.0    
+GRD0308  18-12-2025 Science              Core Subject    63.0    
+GRD0309  18-12-2025 Art                  Elective Subject 68.0    
+GRD0310  18-12-2025 Physical Education   Elective Subject 70.0    
+
+SUMMARY
+-------
+Average: 66.6%
+Passing Grade: 50%
+Status: PASSING

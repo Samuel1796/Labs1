@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU081 - Adwoa Koney
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0401  18-12-2025 Mathematics          Core Subject    75.0    
+GRD0402  18-12-2025 English              Core Subject    77.0    
+GRD0403  18-12-2025 Science              Core Subject    73.0    
+GRD0404  18-12-2025 Art                  Elective Subject 78.0    
+GRD0405  18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 77.0%
+Passing Grade: 50%
+Status: PASSING

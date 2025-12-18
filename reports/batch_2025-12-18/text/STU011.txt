@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU011 - Kwabena Obeng
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD051   18-12-2025 Mathematics          Core Subject    65.0    
+GRD052   18-12-2025 English              Core Subject    68.0    
+GRD053   18-12-2025 Science              Core Subject    62.0    
+GRD054   18-12-2025 Art                  Elective Subject 70.0    
+GRD055   18-12-2025 Physical Education   Elective Subject 72.0    
+
+SUMMARY
+-------
+Average: 67.4%
+Passing Grade: 50%
+Status: PASSING

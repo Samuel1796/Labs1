@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU047 - Yaa Amoako
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0231  18-12-2025 Mathematics          Core Subject    49.0    
+GRD0232  18-12-2025 English              Core Subject    51.0    
+GRD0233  18-12-2025 Science              Core Subject    47.0    
+GRD0234  18-12-2025 Art                  Elective Subject 55.0    
+GRD0235  18-12-2025 Physical Education   Elective Subject 60.0    
+
+SUMMARY
+-------
+Average: 52.4%
+Passing Grade: 50%
+Status: PASSING

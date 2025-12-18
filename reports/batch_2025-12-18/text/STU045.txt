@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU045 - Kwaku Yeboah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0221  18-12-2025 Mathematics          Core Subject    84.0    
+GRD0222  18-12-2025 English              Core Subject    82.0    
+GRD0223  18-12-2025 Science              Core Subject    86.0    
+GRD0224  18-12-2025 Art                  Elective Subject 80.0    
+GRD0225  18-12-2025 Physical Education   Elective Subject 85.0    
+
+SUMMARY
+-------
+Average: 83.4%
+Passing Grade: 50%
+Status: PASSING

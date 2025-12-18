@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU031 - Abena Essien
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0151  18-12-2025 Mathematics          Core Subject    74.0    
+GRD0152  18-12-2025 English              Core Subject    72.0    
+GRD0153  18-12-2025 Science              Core Subject    77.0    
+GRD0154  18-12-2025 Art                  Elective Subject 70.0    
+GRD0155  18-12-2025 Physical Education   Elective Subject 75.0    
+
+SUMMARY
+-------
+Average: 73.6%
+Passing Grade: 50%
+Status: PASSING

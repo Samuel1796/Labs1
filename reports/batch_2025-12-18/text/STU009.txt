@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU009 - Kwesi Amoah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD041   18-12-2025 Mathematics          Core Subject    60.0    
+GRD042   18-12-2025 English              Core Subject    62.0    
+GRD043   18-12-2025 Science              Core Subject    58.0    
+GRD044   18-12-2025 Art                  Elective Subject 65.0    
+GRD045   18-12-2025 Physical Education   Elective Subject 68.0    
+
+SUMMARY
+-------
+Average: 62.6%
+Passing Grade: 50%
+Status: PASSING

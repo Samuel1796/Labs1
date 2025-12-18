@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU025 - Akosua Baah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0121  18-12-2025 Mathematics          Core Subject    81.0    
+GRD0122  18-12-2025 English              Core Subject    80.0    
+GRD0123  18-12-2025 Science              Core Subject    83.0    
+GRD0124  18-12-2025 Art                  Elective Subject 78.0    
+GRD0125  18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 80.8%
+Passing Grade: 50%
+Status: PASSING

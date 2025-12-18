@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU074 - Esi Donkor
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0366  18-12-2025 Mathematics          Core Subject    59.0    
+GRD0367  18-12-2025 English              Core Subject    61.0    
+GRD0368  18-12-2025 Science              Core Subject    57.0    
+GRD0369  18-12-2025 Art                  Elective Subject 62.0    
+GRD0370  18-12-2025 Physical Education   Elective Subject 65.0    
+
+SUMMARY
+-------
+Average: 60.8%
+Passing Grade: 50%
+Status: PASSING

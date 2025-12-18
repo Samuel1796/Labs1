@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU018 - Kofi Amankwah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD086   18-12-2025 Mathematics          Core Subject    77.0    
+GRD087   18-12-2025 English              Core Subject    75.0    
+GRD088   18-12-2025 Science              Core Subject    80.0    
+GRD089   18-12-2025 Art                  Elective Subject 78.0    
+GRD090   18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 78.4%
+Passing Grade: 50%
+Status: PASSING

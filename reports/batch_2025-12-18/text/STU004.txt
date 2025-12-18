@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU004 - Ama Asare
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD016   18-12-2025 Mathematics          Core Subject    55.0    
+GRD017   18-12-2025 English              Core Subject    58.0    
+GRD018   18-12-2025 Science              Core Subject    52.0    
+GRD019   18-12-2025 Art                  Elective Subject 60.0    
+GRD020   18-12-2025 Physical Education   Elective Subject 65.0    
+
+SUMMARY
+-------
+Average: 58.0%
+Passing Grade: 50%
+Status: PASSING

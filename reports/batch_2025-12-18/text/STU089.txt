@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU089 - Esi Tagoe
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0441  18-12-2025 Mathematics          Core Subject    55.0    
+GRD0442  18-12-2025 English              Core Subject    57.0    
+GRD0443  18-12-2025 Science              Core Subject    53.0    
+GRD0444  18-12-2025 Art                  Elective Subject 58.0    
+GRD0445  18-12-2025 Physical Education   Elective Subject 62.0    
+
+SUMMARY
+-------
+Average: 57.0%
+Passing Grade: 50%
+Status: PASSING

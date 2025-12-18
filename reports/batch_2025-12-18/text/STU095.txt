@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU095 - Akwasi Cobbinah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0471  18-12-2025 Mathematics          Core Subject    50.0    
+GRD0472  18-12-2025 English              Core Subject    52.0    
+GRD0473  18-12-2025 Science              Core Subject    48.0    
+GRD0474  18-12-2025 Art                  Elective Subject 55.0    
+GRD0475  18-12-2025 Physical Education   Elective Subject 60.0    
+
+SUMMARY
+-------
+Average: 53.0%
+Passing Grade: 50%
+Status: PASSING

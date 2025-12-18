@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU027 - Maame Dankwa
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0131  18-12-2025 Mathematics          Core Subject    79.0    
+GRD0132  18-12-2025 English              Core Subject    77.0    
+GRD0133  18-12-2025 Science              Core Subject    82.0    
+GRD0134  18-12-2025 Art                  Elective Subject 75.0    
+GRD0135  18-12-2025 Physical Education   Elective Subject 80.0    
+
+SUMMARY
+-------
+Average: 78.6%
+Passing Grade: 50%
+Status: PASSING

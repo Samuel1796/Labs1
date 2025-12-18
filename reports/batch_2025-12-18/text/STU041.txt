@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU041 - Kwabena Owusu
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0201  18-12-2025 Mathematics          Core Subject    56.0    
+GRD0202  18-12-2025 English              Core Subject    58.0    
+GRD0203  18-12-2025 Science              Core Subject    54.0    
+GRD0204  18-12-2025 Art                  Elective Subject 60.0    
+GRD0205  18-12-2025 Physical Education   Elective Subject 62.0    
+
+SUMMARY
+-------
+Average: 58.0%
+Passing Grade: 50%
+Status: PASSING

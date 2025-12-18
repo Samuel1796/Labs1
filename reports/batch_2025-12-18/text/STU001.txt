@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU001 - Kwame Mensah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD01    18-12-2025 Mathematics          Core Subject    75.0    
+GRD02    18-12-2025 English              Core Subject    80.0    
+GRD03    18-12-2025 Science              Core Subject    72.0    
+GRD04    18-12-2025 Art                  Elective Subject 78.0    
+GRD05    18-12-2025 Physical Education   Elective Subject 85.0    
+
+SUMMARY
+-------
+Average: 78.0%
+Passing Grade: 50%
+Status: PASSING

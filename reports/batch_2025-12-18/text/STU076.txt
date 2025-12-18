@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU076 - Abena Fynn
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0376  18-12-2025 Mathematics          Core Subject    71.0    
+GRD0377  18-12-2025 English              Core Subject    73.0    
+GRD0378  18-12-2025 Science              Core Subject    69.0    
+GRD0379  18-12-2025 Art                  Elective Subject 75.0    
+GRD0380  18-12-2025 Physical Education   Elective Subject 78.0    
+
+SUMMARY
+-------
+Average: 73.2%
+Passing Grade: 50%
+Status: PASSING

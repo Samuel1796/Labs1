@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU064 - Ama Poku
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0316  18-12-2025 Mathematics          Core Subject    73.0    
+GRD0317  18-12-2025 English              Core Subject    75.0    
+GRD0318  18-12-2025 Science              Core Subject    71.0    
+GRD0319  18-12-2025 Art                  Elective Subject 76.0    
+GRD0320  18-12-2025 Physical Education   Elective Subject 80.0    
+
+SUMMARY
+-------
+Average: 75.0%
+Passing Grade: 50%
+Status: PASSING

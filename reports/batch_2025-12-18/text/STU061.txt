@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU061 - Abena Manu
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0301  18-12-2025 Mathematics          Core Subject    77.0    
+GRD0302  18-12-2025 English              Core Subject    75.0    
+GRD0303  18-12-2025 Science              Core Subject    79.0    
+GRD0304  18-12-2025 Art                  Elective Subject 74.0    
+GRD0305  18-12-2025 Physical Education   Elective Subject 78.0    
+
+SUMMARY
+-------
+Average: 76.6%
+Passing Grade: 50%
+Status: PASSING

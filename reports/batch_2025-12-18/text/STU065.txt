@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU065 - Akwasi Quansah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0321  18-12-2025 Mathematics          Core Subject    46.0    
+GRD0322  18-12-2025 English              Core Subject    48.0    
+GRD0323  18-12-2025 Science              Core Subject    44.0    
+GRD0324  18-12-2025 Art                  Elective Subject 50.0    
+GRD0325  18-12-2025 Physical Education   Elective Subject 55.0    
+
+SUMMARY
+-------
+Average: 48.6%
+Passing Grade: 50%
+Status: FAILING

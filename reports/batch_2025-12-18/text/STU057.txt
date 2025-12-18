@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU057 - Maame Hagan
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0281  18-12-2025 Mathematics          Core Subject    58.0    
+GRD0282  18-12-2025 English              Core Subject    60.0    
+GRD0283  18-12-2025 Science              Core Subject    56.0    
+GRD0284  18-12-2025 Art                  Elective Subject 62.0    
+GRD0285  18-12-2025 Physical Education   Elective Subject 65.0    
+
+SUMMARY
+-------
+Average: 60.2%
+Passing Grade: 50%
+Status: PASSING

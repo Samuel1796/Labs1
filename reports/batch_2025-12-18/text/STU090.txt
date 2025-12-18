@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU090 - Kwaku Vanderpuye
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0446  18-12-2025 Mathematics          Core Subject    87.0    
+GRD0447  18-12-2025 English              Core Subject    85.0    
+GRD0448  18-12-2025 Science              Core Subject    89.0    
+GRD0449  18-12-2025 Art                  Elective Subject 82.0    
+GRD0450  18-12-2025 Physical Education   Elective Subject 88.0    
+
+SUMMARY
+-------
+Average: 86.2%
+Passing Grade: 50%
+Status: PASSING

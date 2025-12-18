@@ -2,14 +2,11 @@ package services.file;
 
 import models.Student;
 import models.Grade;
-import utilities.FileIOUtils;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Manages concurrent batch grade report generation using a fixed thread pool,
@@ -27,7 +24,8 @@ public class BatchReportTaskManager {
     private final GradeImportExportService gradeImportExportService;
     
     // Export configuration
-    private final int format;              // 1: CSV, 2: JSON, 3: Binary, 4: All formats
+    // 1: PDF summary, 2: Detailed Text, 3: Excel Spreadsheet, 4: All formats (PDF + Text + Excel)
+    private final int format;             // Selected report format code
     private final String outputDir;       // Base directory for output files
     private final int totalTasks;         // Total number of reports to generate
     private final int threadCount;        // Number of worker threads
@@ -75,39 +73,58 @@ public class BatchReportTaskManager {
                 boolean success = false;
                 
                 try {
-                    // Construct base filename: outputDir + studentID
+                    // Construct base filename: outputDir + studentID (used as prefix for all formats)
                     String baseFilename = outputDir + "/" + student.getStudentID();
                     List<String> generatedFiles = new ArrayList<>();
                     
                     // Format-specific export logic
                     // Each format generates different file structures
                     switch (format) {
-                        case 1: // CSV format: single file
-                            String csvPath = baseFilename + ".csv";
-                            exportStudentReportCSV(student, csvPath);
-                            generatedFiles.add(csvPath);
+                        case 1: { // PDF summary
+                            String pdfDir = outputDir + "/pdf";
+                            String pdfBase = pdfDir + "/" + student.getStudentID();
+                            new File(pdfDir).mkdirs();
+                            gradeImportExportService.exportGradeReportPDF(student, pdfBase);
+                            generatedFiles.add(pdfBase + ".pdf");
                             break;
-                        case 2: // JSON format: single file
-                            String jsonPath = baseFilename + ".json";
-                            exportStudentReportJSON(student, jsonPath);
-                            generatedFiles.add(jsonPath);
+                        }
+                        case 2: { // Detailed Text
+                            String textDir = outputDir + "/text";
+                            new File(textDir).mkdirs();
+                            String textPath = textDir + "/" + student.getStudentID() + ".txt";
+                            exportStudentReportText(student, textPath);
+                            generatedFiles.add(textPath);
                             break;
-                        case 3: // Binary format: single file
-                            String binPath = baseFilename + ".dat";
-                            exportStudentReportBinary(student, binPath);
-                            generatedFiles.add(binPath);
+                        }
+                        case 3: { // Excel Spreadsheet
+                            String excelDir = outputDir + "/excel";
+                            String excelBase = excelDir + "/" + student.getStudentID();
+                            new File(excelDir).mkdirs();
+                            gradeImportExportService.exportGradeReportExcel(student, excelBase);
+                            generatedFiles.add(excelBase + ".xlsx");
                             break;
-                        case 4: // All formats: generates files in subdirectories
-                            String[] subdirs = {"csv", "json", "binary"};
-                            String[] extensions = {".csv", ".json", ".dat"};
-                            // Track expected file paths for verification
-                            for (int i = 0; i < subdirs.length; i++) {
-                                String dirPath = outputDir + "/" + subdirs[i];
-                                String filePath = dirPath + "/" + student.getStudentID() + extensions[i];
-                                generatedFiles.add(filePath);
-                            }
-                            gradeImportExportService.exportGradeReportMultiFormat(student, 2, baseFilename);
+                        }
+                        case 4: { // All Formats: PDF + Detailed Text + Excel
+                            String pdfDir = outputDir + "/pdf";
+                            String textDir = outputDir + "/text";
+                            String excelDir = outputDir + "/excel";
+                            new File(pdfDir).mkdirs();
+                            new File(textDir).mkdirs();
+                            new File(excelDir).mkdirs();
+
+                            String pdfBase = pdfDir + "/" + student.getStudentID();
+                            String textPath = textDir + "/" + student.getStudentID() + ".txt";
+                            String excelBase = excelDir + "/" + student.getStudentID();
+
+                            gradeImportExportService.exportGradeReportPDF(student, pdfBase);
+                            exportStudentReportText(student, textPath);
+                            gradeImportExportService.exportGradeReportExcel(student, excelBase);
+
+                            generatedFiles.add(pdfBase + ".pdf");
+                            generatedFiles.add(textPath);
+                            generatedFiles.add(excelBase + ".xlsx");
                             break;
+                        }
                         default:
                             throw new IllegalArgumentException("Unknown format: " + format);
                     }
@@ -172,89 +189,52 @@ public class BatchReportTaskManager {
     }
     
     /**
-     * Exports a single student's grades to CSV format.
+     * Exports a single student's grades to a detailed text report.
      */
-    private void exportStudentReportCSV(Student student, String filePath) throws IOException {
-        // Ensure directory exists
+    private void exportStudentReportText(Student student, String filePath) throws IOException {
         File file = new File(filePath);
         File parentDir = file.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
             parentDir.mkdirs();
         }
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         List<Grade> studentGrades = getStudentGrades(student);
-        
-        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(Paths.get(filePath))) {
-            writer.write("gradeID,studentID,subjectName,subjectType,value,date\n");
+
+        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get(filePath))) {
+            writer.write("GRADE REPORT\n");
+            writer.write("===========\n");
+            writer.write(String.format("Student: %s - %s%n", student.getStudentID(), student.getName()));
+            writer.write(String.format("Type: %s%n",
+                    (student instanceof models.HonorsStudent) ? "Honors Student" : "Regular Student"));
+            writer.write(String.format("Total Grades: %d%n", studentGrades.size()));
+            writer.write("\nGRADE HISTORY\n");
+            writer.write("------------\n");
+            writer.write(String.format("%-8s %-10s %-20s %-15s %-8s%n",
+                    "GRD ID", "DATE", "SUBJECT", "TYPE", "GRADE"));
+
+            double total = 0.0;
             for (Grade g : studentGrades) {
-                writer.write(String.format("%s,%s,%s,%s,%.1f,%s\n",
-                    g.getGradeID(), g.getStudentID(), g.getSubjectName(),
-                    g.getSubjectType(), g.getValue(), sdf.format(g.getDate())));
+                writer.write(String.format("%-8s %-10s %-20s %-15s %-8.1f%n",
+                        g.getGradeID(),
+                        sdf.format(g.getDate()),
+                        g.getSubjectName(),
+                        g.getSubjectType(),
+                        g.getValue()));
+                total += g.getValue();
             }
-            writer.flush(); // Ensure data is written immediately
+
+            double avg = studentGrades.isEmpty() ? 0.0 : total / studentGrades.size();
+            writer.write("\nSUMMARY\n");
+            writer.write("-------\n");
+            writer.write(String.format("Average: %.1f%%%n", avg));
+            writer.write(String.format("Passing Grade: %d%%%n", student.getPassingGrade()));
+            writer.write(String.format("Status: %s%n",
+                    student.isPassing(gradeImportExportService.getGradeService()) ? "PASSING" : "FAILING"));
+            writer.flush();
         }
-        // Verify file was created
-        if (!new File(filePath).exists()) {
-            throw new IOException("File was not created: " + filePath);
-        }
-    }
-    
-    /**
-     * Exports a single student's grades to JSON format.
-     */
-    private void exportStudentReportJSON(Student student, String filePath) throws IOException {
-        // Ensure directory exists
-        File file = new File(filePath);
-        File parentDir = file.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
-        }
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        List<Grade> studentGrades = getStudentGrades(student);
-        List<Map<String, Object>> formattedGrades = new ArrayList<>();
-        
-        for (Grade g : studentGrades) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("gradeID", g.getGradeID());
-            map.put("studentID", g.getStudentID());
-            map.put("subjectName", g.getSubjectName());
-            map.put("subjectType", g.getSubjectType());
-            map.put("value", g.getValue());
-            map.put("date", sdf.format(g.getDate()));
-            formattedGrades.add(map);
-        }
-        
-        ObjectMapper mapper = new ObjectMapper();
-        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(Paths.get(filePath))) {
-            writer.write(mapper.writeValueAsString(formattedGrades));
-            writer.flush(); // Ensure data is written immediately
-        }
-        // Verify file was created
-        File createdFile = new File(filePath);
-        if (!createdFile.exists()) {
-            throw new IOException("File was not created: " + filePath);
-        }
-    }
-    
-    /**
-     * Exports a single student's grades to Binary format.
-     */
-    private void exportStudentReportBinary(Student student, String filePath) throws IOException {
-        // Ensure directory exists
-        File file = new File(filePath);
-        File parentDir = file.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
-        }
-        
-        List<Grade> studentGrades = getStudentGrades(student);
-        FileIOUtils.writeGradesToBinary(Paths.get(filePath), studentGrades);
-        
-        // Verify file was created
-        File createdFile = new File(filePath);
-        if (!createdFile.exists()) {
+
+        if (!file.exists()) {
             throw new IOException("File was not created: " + filePath);
         }
     }

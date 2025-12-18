@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU067 - Yaw Tawiah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0331  18-12-2025 Mathematics          Core Subject    68.0    
+GRD0332  18-12-2025 English              Core Subject    70.0    
+GRD0333  18-12-2025 Science              Core Subject    66.0    
+GRD0334  18-12-2025 Art                  Elective Subject 72.0    
+GRD0335  18-12-2025 Physical Education   Elective Subject 75.0    
+
+SUMMARY
+-------
+Average: 70.2%
+Passing Grade: 50%
+Status: PASSING

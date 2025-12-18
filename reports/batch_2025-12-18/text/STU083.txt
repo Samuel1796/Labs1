@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU083 - Afia Mends
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0411  18-12-2025 Mathematics          Core Subject    48.0    
+GRD0412  18-12-2025 English              Core Subject    50.0    
+GRD0413  18-12-2025 Science              Core Subject    46.0    
+GRD0414  18-12-2025 Art                  Elective Subject 52.0    
+GRD0415  18-12-2025 Physical Education   Elective Subject 55.0    
+
+SUMMARY
+-------
+Average: 50.2%
+Passing Grade: 50%
+Status: PASSING

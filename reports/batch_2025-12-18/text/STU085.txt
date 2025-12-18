@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU085 - Akosua Odamtten
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0421  18-12-2025 Mathematics          Core Subject    78.0    
+GRD0422  18-12-2025 English              Core Subject    76.0    
+GRD0423  18-12-2025 Science              Core Subject    80.0    
+GRD0424  18-12-2025 Art                  Elective Subject 74.0    
+GRD0425  18-12-2025 Physical Education   Elective Subject 78.0    
+
+SUMMARY
+-------
+Average: 77.2%
+Passing Grade: 50%
+Status: PASSING

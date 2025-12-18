@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU050 - Akwasi Attah
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0246  18-12-2025 Mathematics          Core Subject    63.0    
+GRD0247  18-12-2025 English              Core Subject    65.0    
+GRD0248  18-12-2025 Science              Core Subject    61.0    
+GRD0249  18-12-2025 Art                  Elective Subject 68.0    
+GRD0250  18-12-2025 Physical Education   Elective Subject 70.0    
+
+SUMMARY
+-------
+Average: 65.4%
+Passing Grade: 50%
+Status: PASSING

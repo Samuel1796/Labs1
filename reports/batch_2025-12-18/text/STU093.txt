@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU093 - Kofi Adomako
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0461  18-12-2025 Mathematics          Core Subject    81.0    
+GRD0462  18-12-2025 English              Core Subject    79.0    
+GRD0463  18-12-2025 Science              Core Subject    83.0    
+GRD0464  18-12-2025 Art                  Elective Subject 78.0    
+GRD0465  18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 80.6%
+Passing Grade: 50%
+Status: PASSING

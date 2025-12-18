@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU092 - Yaa Acheampong
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0456  18-12-2025 Mathematics          Core Subject    64.0    
+GRD0457  18-12-2025 English              Core Subject    66.0    
+GRD0458  18-12-2025 Science              Core Subject    62.0    
+GRD0459  18-12-2025 Art                  Elective Subject 68.0    
+GRD0460  18-12-2025 Physical Education   Elective Subject 70.0    
+
+SUMMARY
+-------
+Average: 66.0%
+Passing Grade: 50%
+Status: PASSING

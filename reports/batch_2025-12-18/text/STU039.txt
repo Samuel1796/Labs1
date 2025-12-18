@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU039 - Kwesi Ofori
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0191  18-12-2025 Mathematics          Core Subject    82.0    
+GRD0192  18-12-2025 English              Core Subject    80.0    
+GRD0193  18-12-2025 Science              Core Subject    85.0    
+GRD0194  18-12-2025 Art                  Elective Subject 78.0    
+GRD0195  18-12-2025 Physical Education   Elective Subject 82.0    
+
+SUMMARY
+-------
+Average: 81.4%
+Passing Grade: 50%
+Status: PASSING

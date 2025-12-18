@@ -1,0 +1,20 @@
+GRADE REPORT
+===========
+Student: STU071 - Kwabena Ababio
+Type: Regular Student
+Total Grades: 5
+
+GRADE HISTORY
+------------
+GRD ID   DATE       SUBJECT              TYPE            GRADE   
+GRD0351  18-12-2025 Mathematics          Core Subject    57.0    
+GRD0352  18-12-2025 English              Core Subject    59.0    
+GRD0353  18-12-2025 Science              Core Subject    55.0    
+GRD0354  18-12-2025 Art                  Elective Subject 60.0    
+GRD0355  18-12-2025 Physical Education   Elective Subject 62.0    
+
+SUMMARY
+-------
+Average: 58.6%
+Passing Grade: 50%
+Status: PASSING
