@@ -12,22 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Manages concurrent batch report generation using a thread pool executor.
- * 
- * This class implements a producer-consumer pattern where:
- * - Main thread submits tasks (students) to the executor
- * - Worker threads process export tasks concurrently
- * - Progress tracking uses thread-safe atomic counters and concurrent maps
- * 
- * Thread Safety:
- * - Uses ConcurrentHashMap for thread-safe status tracking
- * - Uses AtomicInteger for lock-free counter operations
- * - Fixed thread pool prevents resource exhaustion
- * 
- * Performance Characteristics:
- * - Parallel execution reduces total processing time
- * - Thread pool size should match CPU cores for optimal throughput
- * - File I/O operations are the primary bottleneck
+ * Manages concurrent batch grade report generation using a fixed thread pool,
+ * tracking per-student status, timings, and printing a real-time progress summary.
  */
 public class BatchReportTaskManager {
     // Thread pool executor: manages worker threads for concurrent report generation
@@ -73,28 +59,7 @@ public class BatchReportTaskManager {
         new java.io.File(outputDir).mkdirs();
     }
 
-    /**
-     * Starts concurrent batch export process for all students.
-     * 
-     * This method implements the core concurrent execution pattern:
-     * 1. Submits all export tasks to the thread pool executor
-     * 2. Each task runs in a separate worker thread
-     * 3. Main thread monitors progress and displays real-time updates
-     * 4. Waits for all tasks to complete before finalizing
-     * 
-     * Concurrency Model:
-     * - Tasks are submitted asynchronously (non-blocking)
-     * - Worker threads execute tasks concurrently (limited by thread pool size)
-     * - Status updates use thread-safe data structures
-     * - Progress monitoring runs in main thread (polling-based)
-     * 
-     * File Generation Verification:
-     * After export, verifies file existence with polling to handle async file system operations.
-     * This ensures accurate success/failure reporting.
-     * 
-     * Time Complexity: O(n) where n is number of students
-     * Space Complexity: O(n) for futures list and status maps
-     */
+    /** Starts the concurrent batch export for all students and waits until all reports finish. */
     public void startBatchExport() {
         long startTime = System.currentTimeMillis();
         List<Future<?>> futures = new ArrayList<>();
@@ -317,29 +282,7 @@ public class BatchReportTaskManager {
         return active;
     }
 
-    /**
-     * Displays real-time progress information during batch export.
-     * 
-     * Calculates and displays:
-     * - Completion count and percentage
-     * - Elapsed time
-     * - Average report generation time
-     * - Throughput (reports per second)
-     * - Per-student status (which thread is processing which student)
-     * 
-     * Thread Pool Metrics:
-     * - Active threads: calculated by comparing pool size to thread count
-     * - Queue size: remaining tasks waiting for thread availability
-     * 
-     * Performance Metrics:
-     * - Average time: mean of all completed report times
-     * - Throughput: completed reports / elapsed time
-     * 
-     * Display Format:
-     * Uses carriage return (\r) to overwrite same line for smooth progress updates.
-     * 
-     * @param startTime Timestamp when batch export started (for elapsed time calculation)
-     */
+    /** Prints a single real-time progress line (percentage, timings, throughput) for the batch run. */
     private void showProgress(long startTime) {
         // Get current completion status (atomic read)
         int done = completedTasks.get();
@@ -391,16 +334,7 @@ public class BatchReportTaskManager {
         }
     }
 
-    /**
-     * Displays comprehensive execution summary with performance metrics.
-     * 
-     * Includes:
-     * - Success/failure statistics
-     * - Time metrics (total, average, estimated sequential)
-     * - Performance gain calculation
-     * - Thread pool statistics
-     * - File generation details
-     */
+    /** Prints a final execution summary with success counts, timing, throughput and file details. */
     private void showSummary(long startTime) {
         double elapsed = (System.currentTimeMillis() - startTime) / 1000.0;
         int successCount = totalTasks - failedTasks.get();
@@ -486,27 +420,7 @@ public class BatchReportTaskManager {
         return completedTasks.get() < totalTasks;
     }
 
-    /**
-     * Gracefully shuts down the thread pool executor.
-     * 
-     * Shutdown Strategy:
-     * 1. Initiate graceful shutdown: stops accepting new tasks, allows running tasks to complete
-     * 2. Wait up to 10 seconds for tasks to finish
-     * 3. If timeout occurs, force shutdown (interrupts running tasks)
-     * 
-     * This two-phase approach ensures:
-     * - Running tasks have time to complete cleanly
-     * - System doesn't hang indefinitely if tasks are stuck
-     * - Resources are properly released
-     * 
-     * Thread Safety:
-     * - shutdown() is thread-safe and idempotent (safe to call multiple times)
-     * - shutdownNow() interrupts all running tasks
-     * 
-     * Best Practice:
-     * Always call shutdown() to prevent resource leaks. The executor service
-     * maintains threads that won't be garbage collected until explicitly shut down.
-     */
+    /** Shuts down the executor service gracefully, forcing shutdown if it does not terminate in time. */
     public void shutdown() {
         // Phase 1: Initiate graceful shutdown
         // Stops accepting new tasks but allows running tasks to complete

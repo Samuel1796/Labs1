@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat;
 public class GradeService {
     private final Grade[] grades;
     private int gradeCount;
+    // LinkedList keeps grade history in insertion order with O(1) add/remove at ends for frequent updates.
+    private final LinkedList<Grade> gradeHistory = new LinkedList<>();
 
     /**
      * Constructs a GradeService with a specified maximum number of grades.
@@ -50,9 +52,9 @@ public class GradeService {
             throw new InvalidGradeException(grade.getValue());
         }
         
-        // Store grade using gradeCount as both counter and index
-        // Post-increment ensures gradeCount points to next available slot
+        // Store grade in array (O(1)) and append to grade history list (O(1) addLast).
         grades[gradeCount++] = grade;
+        gradeHistory.addLast(grade);
 
         // Ensure the subject is enrolled for the student
         // This maintains data consistency: grades should only exist for enrolled subjects
@@ -106,6 +108,14 @@ public class GradeService {
      */
     public int getGradeCount() {
         return gradeCount;
+    }
+
+    /**
+     * Returns a read-only view of the grade history list (in insertion order).
+     * LinkedList iteration is O(n); appends/removals at ends stay O(1).
+     */
+    public List<Grade> getGradeHistory() {
+        return Collections.unmodifiableList(gradeHistory);
     }
 
     /**

@@ -53,10 +53,7 @@ public class LRUCache<K, V> {
         this.cache = new ConcurrentHashMap<>(maxSize);
     }
     
-    /**
-     * Gets value from cache (thread-safe).
-     * Updates access time for LRU tracking.
-     */
+    /** Gets a value from the cache in O(1) average time and updates access time for LRU tracking. */
     public V get(K key) {
         long startTime = System.nanoTime();
         CacheEntry<V> entry = cache.get(key);
@@ -77,10 +74,7 @@ public class LRUCache<K, V> {
         }
     }
     
-    /**
-     * Puts value into cache (thread-safe).
-     * Evicts least recently used entry if cache is full.
-     */
+    /** Inserts or replaces a value (avg O(1)); evicts one least-recently-used entry in O(n) when full. */
     public void put(K key, V value) {
         synchronized (cache) {
             // Check if we need to evict
@@ -92,9 +86,7 @@ public class LRUCache<K, V> {
         }
     }
     
-    /**
-     * Evicts the least recently used entry.
-     */
+    /** Scans entries to remove the least recently used key (O(n) over current cache size). */
     private void evictLRU() {
         K lruKey = null;
         long oldestAccessTime = Long.MAX_VALUE;

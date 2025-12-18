@@ -10,25 +10,18 @@ import java.text.SimpleDateFormat;
 import java.io.*;
 
 /**
- * Scheduled Automated Tasks Manager (US-6).
- * 
- * Manages recurring tasks using ScheduledExecutorService:
- * - Daily GPA recalculation
- * - Hourly statistics cache refresh
- * - Weekly batch report generation
- * - Daily database backup
- * 
- * Features:
- * - Task persistence (survives application restart)
- * - Background execution (non-blocking)
- * - Execution logging with timestamps
- * - Task status monitoring
- * - Notification system (simulated)
+ * Manages recurring background tasks (GPA recalculation, stats refresh, backups, etc.)
+ * using a ScheduledExecutorService with basic persistence and execution history.
  */
 public class TaskScheduler {
     
     private ScheduledExecutorService scheduler;
+    // ConcurrentHashMap gives O(1) average add/get for tasks by ID across threads.
     private final Map<String, ScheduledTask> scheduledTasks = new ConcurrentHashMap<>();
+    // PriorityQueue orders tasks by next execution time so the nearest task can be peeked in O(1), updated in O(log n).
+    private final PriorityQueue<ScheduledTask> taskQueue =
+            new PriorityQueue<>(Comparator.comparing(ScheduledTask::getNextExecution, Comparator.nullsLast(Date::compareTo)));
+    // Synchronized List keeps execution history in insertion order; append is O(1) amortized.
     private final List<TaskExecution> executionHistory = Collections.synchronizedList(new ArrayList<>());
     private final StatisticsService statisticsService;
     private final GradeService gradeService;
@@ -168,6 +161,8 @@ public class TaskScheduler {
         task.setFuture(future);
         task.setNextExecution(new Date(System.currentTimeMillis() + (initialDelay * 1000)));
         scheduledTasks.put(taskId, task);
+        // Maintain a priority queue for quick access to the next task by execution time.
+        taskQueue.offer(task);
         
         // Persist task
         persistTasks();
@@ -440,6 +435,13 @@ public class TaskScheduler {
      */
     public List<TaskExecution> getExecutionHistory() {
         return new ArrayList<>(executionHistory);
+    }
+
+    /**
+     * Returns the next scheduled task by earliest nextExecution time using the priority queue (O(1) peek).
+     */
+    public ScheduledTask peekNextScheduledTask() {
+        return taskQueue.peek();
     }
 }
 

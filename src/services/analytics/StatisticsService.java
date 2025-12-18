@@ -18,6 +18,9 @@ public class StatisticsService {
     private final int studentCount;
     private final services.file.GradeService gradeService;
 
+    // Tracks unique course names using HashSet for O(1) average membership checks and inserts.
+    private final Set<String> uniqueCourses = new HashSet<>();
+
     /**
      * Constructs a StatisticsService with the provided grades, students, and supporting services.
      * @param grades Array of Grade objects.
@@ -32,6 +35,14 @@ public class StatisticsService {
         this.students = students;
         this.studentCount = studentCount;
         this.gradeService = gradeService;
+
+        // Pre-populate uniqueCourses set in O(n) by scanning all recorded grades once.
+        for (int i = 0; i < gradeCount; i++) {
+            Grade g = grades[i];
+            if (g != null) {
+                uniqueCourses.add(g.getSubjectName());
+            }
+        }
     }
 
     /**
@@ -39,6 +50,7 @@ public class StatisticsService {
      * @return List of grade values.
      */
     private List<Double> getAllGradeValues() {
+        // ArrayList maintains insertion order; building this list is O(n) over gradeCount.
         List<Double> values = new ArrayList<>();
         for (int i = 0; i < gradeCount; i++) {
             if (grades[i] != null) {
@@ -46,6 +58,14 @@ public class StatisticsService {
             }
         }
         return values;
+    }
+
+    /**
+     * Returns the set of unique course names seen in all grades.
+     * Uses HashSet for O(1) average add/contains; overall build cost is O(n) over all grades.
+     */
+    public Set<String> getUniqueCourses() {
+        return Collections.unmodifiableSet(uniqueCourses);
     }
 
     /**
