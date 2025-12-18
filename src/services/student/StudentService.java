@@ -15,7 +15,7 @@ import java.nio.file.Paths;
  */
 
 public class StudentService {
-    // HashMap for fast student lookup by ID
+    // HashMap for O(1) average-case add/get by normalized student ID (fast lookup on large datasets).
     private final HashMap<String, Student> studentMap = new HashMap<>();
 
     /**
@@ -174,8 +174,7 @@ public class StudentService {
      * @return Array of Student objects whose names contain the search term
      */
     public Student[] searchStudentsByName(String namePart) {
-        // Stream API approach: functional-style filtering
-        // More readable and concise than traditional loops
+        // Stream over HashMap values in O(n) to build a filtered result array.
         return studentMap.values().stream()
                 // Filter: keep only students whose name contains search term
                 // Case-insensitive: convert both to lowercase for comparison
@@ -220,7 +219,7 @@ public class StudentService {
      * @return Array of Student objects whose average grade is within the specified range
      */
     public Student[] searchStudentsByGradeRange(double min, double max, services.file.GradeService gradeService) {
-        // Stream API with range filtering
+        // Stream API with range filtering; overall O(n * g) where g is grades per student.
         return studentMap.values().stream()
                 .filter(s -> {
                     // Calculate average for this student
@@ -261,7 +260,7 @@ public class StudentService {
      * @return Array of Student objects matching the specified type
      */
     public Student[] searchStudentsByType(boolean honors) {
-        // Stream API with type filtering
+        // Stream API with type filtering; single pass O(n) over all students.
         return studentMap.values().stream()
                 // Type check: compare desired type with actual instance type
                 // honors == (s instanceof HonorsStudent) ensures boolean match
@@ -279,7 +278,7 @@ public class StudentService {
         System.out.println("| STUDENT ID  | NAME                  | TYPE            | AVG GRADE | STATUS       | ENROLLED SUBJECTS    | PASSING GRADE | Honors Eligible     |");
         System.out.println("|_______________________________________________________________________________________________________________________________________________|");
     
-        // Sort students by Student ID
+        // Copy to ArrayList and sort by Student ID (overall O(n log n) for ordering plus O(n) copy).
         List<Student> sortedStudents = new ArrayList<>(studentMap.values());
         sortedStudents.sort(Comparator.comparing(Student::getStudentID, String.CASE_INSENSITIVE_ORDER));
 
@@ -305,6 +304,20 @@ public class StudentService {
         }
     
         System.out.println("|=============================================================================================================================================|");
+    }
+
+    /**
+     * Returns students sorted by performance: average grade (desc), then name, then ID.
+     * Uses a custom Comparator; overall sort cost is O(n log n) on the HashMap value snapshot.
+     */
+    public List<Student> getStudentsSortedByPerformance(services.file.GradeService gradeService) {
+        List<Student> sorted = new ArrayList<>(studentMap.values());
+        Comparator<Student> performanceComparator = Comparator
+                .comparingDouble((Student s) -> s.calculateAverage(gradeService)).reversed()
+                .thenComparing(Student::getName, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(Student::getStudentID, String.CASE_INSENSITIVE_ORDER);
+        sorted.sort(performanceComparator);
+        return sorted;
     }
 
     /**

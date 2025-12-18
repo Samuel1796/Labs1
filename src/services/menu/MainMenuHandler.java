@@ -13,8 +13,6 @@ import services.analytics.StatisticsService;
 import services.analytics.StatisticsDashboard;
 import services.search.PatternSearchService;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -552,20 +550,18 @@ System.out.println("ERROR: " + e.getMessage());
                 case 10:
                     /**
                      * Real-Time Statistics Dashboard Handler
-                     * 
+                     *
                      * Implements US-5: Real-Time Statistics Dashboard with Background Thread.
-                     * 
+                     *
                      * Features:
-                     * - Auto-refreshing dashboard every 5 seconds
-                     * - Background daemon thread for statistics calculation
-                     * - Interactive controls (refresh, pause/resume, quit)
-                     * - Live grade distribution, top performers, system metrics
-                     * - Thread-safe data handling
+                     * - Auto-refreshing dashboard every 5 seconds (background daemon thread)
+                     * - Live grade distribution, averages, and top performers
+                     * - Manual refresh, pause/resume, and quit controls
+                     * - Thread-safe data handling via ConcurrentHashMap and atomics
                      */
-                    // Create StatisticsDashboard with StudentService for fresh data on each refresh
+                    // Create StatisticsDashboard using current GradeService data and student collection
                     StatisticsDashboard dashboard = new StatisticsDashboard(
                         gradeService,
-                        studentService,
                         studentService.getStudents(),
                         studentService.getStudentCount()
                     );
@@ -586,8 +582,12 @@ System.out.println("ERROR: " + e.getMessage());
                         
                         switch (command) {
                             case "R":
-                                // Manual refresh
+                                // Manual refresh (forces immediate recalculation)
                                 dashboard.refresh();
+                                break;
+                            case "P":
+                                // Pause or resume background auto-refresh
+                                dashboard.togglePause();
                                 break;
                             case "Q":
                                 dashboardRunning = false;
@@ -595,7 +595,7 @@ System.out.println("ERROR: " + e.getMessage());
                                 menuService.setStatisticsDashboard(null);
                                 break;
                             default:
-                                // Continue loop to refresh display
+                                // Any other key just re-draws the dashboard
                                 break;
                         }
                         

@@ -1,11 +1,6 @@
 package services.analytics;
 
 import models.Student;
-import models.Grade;
-import models.HonorsStudent;
-import models.RegularStudent;
-import services.file.GradeService;
-import services.student.StudentService;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,32 +8,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 /**
- * Real-Time Statistics Dashboard with background thread for auto-refresh.
- * 
- * Implements US-5: Real-Time Statistics Dashboard with Background Thread.
- * 
- * Features:
- * - Background daemon thread calculating statistics every 5 seconds
- * - Auto-refreshing dashboard with live statistics
- * - Thread-safe data handling using ConcurrentHashMap
- * - Manual refresh, pause, and resume functionality
- * - Performance metrics (cache hit rate, memory usage)
- * - Thread status monitoring
- * 
- * Thread Safety:
- * - Uses ConcurrentHashMap for thread-safe statistics cache
- * - Atomic variables for counters and flags
- * - Synchronized blocks for complex operations
- * - Proper thread lifecycle management
+ * Console dashboard that shows live class statistics (mean, median, std dev, grade distribution)
+ * using the same calculations as "View Class Statistics", with a background daemon thread that
+ * periodically recalculates statistics while still allowing manual refresh.
  */
 public class StatisticsDashboard {
     
-    // Services and data
+    // Services and data (GradeService supplies the grade array used for statistics).
     private final services.file.GradeService gradeService;
-    private final services.student.StudentService studentService;
     private final Collection<Student> students;
     private final int studentCount;
     
@@ -47,52 +26,31 @@ public class StatisticsDashboard {
     private Future<?> statisticsTask;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final AtomicBoolean isPaused = new AtomicBoolean(false);
+    private final AtomicBoolean isCalculating = new AtomicBoolean(false);
     private final AtomicLong lastUpdateTime = new AtomicLong(0);
     private final AtomicInteger cacheHits = new AtomicInteger(0);
     private final AtomicInteger cacheMisses = new AtomicInteger(0);
     
-    // Statistics cache: thread-safe storage for calculated statistics
+    // Statistics cache: ConcurrentHashMap gives O(1) average get/put for live metric lookups.
     private final ConcurrentHashMap<String, Object> statsCache = new ConcurrentHashMap<>();
     
-    // GPA rankings: TreeMap for automatic sorting by GPA (descending)
+    // GPA rankings: TreeMap keeps students sorted by GPA descending; inserts and lookups are O(log n).
     private final TreeMap<Double, List<Student>> gpaRankings = new TreeMap<>(Collections.reverseOrder());
     
     // Refresh interval in seconds
     private static final int REFRESH_INTERVAL_SECONDS = 5;
     
     /**
-     * Constructs a StatisticsDashboard with required services.
-     * 
-     * @param statisticsService Service for statistical calculations (kept for compatibility, but we'll recreate it)
-     * @param gradeService Service for grade data access
-     * @param students Collection of all students
-     * @param studentCount Total number of students
+     * Constructs a StatisticsDashboard with GradeService and the current student collection.
      */
-    public StatisticsDashboard(StatisticsService statisticsService, services.file.GradeService gradeService,
-                              Collection<Student> students, int studentCount) {
-        // Store services - we'll recreate StatisticsService with fresh data on each refresh
-        this.gradeService = gradeService;
-        this.students = students;
-        this.studentCount = studentCount;
-        // Get StudentService from students collection if needed, or pass it separately
-        this.studentService = null; // Will be set if needed
-    }
-    
-    /**
-     * Alternative constructor that accepts StudentService.
-     */
-    public StatisticsDashboard(services.file.GradeService gradeService, services.student.StudentService studentService,
+    public StatisticsDashboard(services.file.GradeService gradeService,
                               Collection<Student> students, int studentCount) {
         this.gradeService = gradeService;
-        this.studentService = studentService;
         this.students = students;
         this.studentCount = studentCount;
     }
     
-    /**
-     * Starts the statistics dashboard (manual refresh only).
-     * No auto-refresh - statistics are calculated only on manual refresh.
-     */
+    /** Starts the statistics dashboard and launches the auto-refresh background task. */
     public void start() {
         if (isRunning.get()) {
             System.out.println("Dashboard is already running.");
@@ -101,23 +59,39 @@ public class StatisticsDashboard {
         
         isRunning.set(true);
         isPaused.set(false);
-        
-        // Calculate initial statistics
+
+        // Initial statistics before scheduling periodic recalculation.
         calculateAndCacheStatistics();
+
+        // Single daemon thread recalculates statistics every REFRESH_INTERVAL_SECONDS seconds.
+        scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "StatisticsDashboard-Thread");
+            t.setDaemon(true);
+            return t;
+        });
+
+        statisticsTask = scheduler.scheduleAtFixedRate(() -> {
+            if (!isRunning.get() || isPaused.get()) {
+                return; // Skip when dashboard stopped or paused.
+            }
+            calculateAndCacheStatistics();
+        }, REFRESH_INTERVAL_SECONDS, REFRESH_INTERVAL_SECONDS, TimeUnit.SECONDS);
         
-        System.out.println("Statistics Dashboard started (Manual refresh only).");
-        System.out.println("Press 'R' to refresh statistics, 'Q' to quit.");
+        System.out.println("Statistics Dashboard started (Auto-refresh every " + REFRESH_INTERVAL_SECONDS + "s).");
+        System.out.println("Commands: [R]efresh now, [P]ause/Resume auto-refresh, [Q]uit dashboard.");
     }
     
     /**
-     * Calculates statistics and updates cache.
-     * Uses the same approach as "View Class Statistics" - creates a fresh StatisticsService
-     * with current data from GradeService on each refresh.
-     * 
-     * This ensures statistics are always up-to-date with the latest grade data.
+     * Calculates statistics and updates cache using the same methods as "View Class Statistics".
+     * Builds a fresh StatisticsService from current GradeService data on each call.
      */
     public void calculateAndCacheStatistics() {
         try {
+            // Prevent overlapping calculations and mark dashboard as "loading".
+            if (!isCalculating.compareAndSet(false, true)) {
+                return;
+            }
+
             long startTime = System.currentTimeMillis();
             
             // Create fresh StatisticsService with current data (same as "View Class Statistics")
@@ -157,12 +131,11 @@ public class StatisticsDashboard {
             long calculationTime = System.currentTimeMillis() - startTime;
             statsCache.put("calculationTime", calculationTime);
             
-            // Cache hit/miss tracking (for demonstration)
-            cacheMisses.incrementAndGet();
-            
         } catch (Exception e) {
             System.err.println("Error calculating statistics: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            isCalculating.set(false);
         }
     }
     
@@ -249,10 +222,10 @@ public class StatisticsDashboard {
         System.out.println();
         
         // Status bar
-        String threadStatus = isRunning.get() ? "RUNNING" : "STOPPED";
+        String threadStatus = getThreadStatus();
         
-        System.out.println("Mode: Manual Refresh Only | Status: " + threadStatus);
-        System.out.println("Press 'Q' to quit | 'R' to refresh statistics");
+        System.out.println("Mode: Auto + Manual Refresh | Status: " + threadStatus);
+        System.out.println("Press 'Q' to quit | 'R' to refresh now | 'P' to pause/resume auto-refresh");
         
         // Last update time
         long lastUpdate = lastUpdateTime.get();
@@ -285,17 +258,19 @@ public class StatisticsDashboard {
         long usedMemory = totalMemory - freeMemory;
         System.out.printf("│ Memory Usage: %-52s │%n", 
             formatBytes(usedMemory) + " / " + formatBytes(totalMemory));
+        System.out.printf("│ Background Thread: %-44s │%n", threadStatus);
+        System.out.printf("│ Calculation State: %-44s │%n", isCalculating.get() ? "LOADING..." : "Idle / Up-to-date");
         System.out.println("└────────────────────────────────────────────────────────────────────────┘");
         System.out.println();
         
         // Live Statistics
         System.out.println("┌─ LIVE STATISTICS ────────────────────────────────────────────────────┐");
-        Integer totalGrades = (Integer) statsCache.get("totalGrades");
+        Integer totalGrades = (Integer) getFromCache("totalGrades");
         if (totalGrades != null) {
             System.out.printf("│ Total Grades: %-51d │%n", totalGrades);
         }
         
-        Long calcTime = (Long) statsCache.get("calculationTime");
+        Long calcTime = (Long) getFromCache("calculationTime");
         if (calcTime != null) {
             System.out.printf("│ Average Processing Time: %-42dms │%n", calcTime);
         }
@@ -304,7 +279,7 @@ public class StatisticsDashboard {
         
         // Grade Distribution
         @SuppressWarnings("unchecked")
-        Map<String, Integer> distribution = (Map<String, Integer>) statsCache.get("gradeDistribution");
+        Map<String, Integer> distribution = (Map<String, Integer>) getFromCache("gradeDistribution");
         if (distribution != null) {
             System.out.println("┌─ GRADE DISTRIBUTION (Live) ────────────────────────────────────────┐");
             displayGradeDistribution(distribution, totalGrades != null ? totalGrades : 0);
@@ -314,9 +289,9 @@ public class StatisticsDashboard {
         
         // Current Statistics
         System.out.println("┌─ CURRENT STATISTICS ──────────────────────────────────────────────────┐");
-        Double mean = (Double) statsCache.get("mean");
-        Double median = (Double) statsCache.get("median");
-        Double stdDev = (Double) statsCache.get("stdDev");
+        Double mean = (Double) getFromCache("mean");
+        Double median = (Double) getFromCache("median");
+        Double stdDev = (Double) getFromCache("stdDev");
         
         if (mean != null) {
             System.out.printf("│ Mean: %-58.1f%% │%n", mean);
@@ -332,7 +307,7 @@ public class StatisticsDashboard {
         
         // Top Performers
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> topPerformers = (List<Map<String, Object>>) statsCache.get("topPerformers");
+        List<Map<String, Object>> topPerformers = (List<Map<String, Object>>) getFromCache("topPerformers");
         if (topPerformers != null && !topPerformers.isEmpty()) {
             System.out.println("┌─ TOP PERFORMERS (Live Rankings) ───────────────────────────────────┐");
             int rank = 1;
@@ -348,19 +323,20 @@ public class StatisticsDashboard {
             System.out.println();
         }
         
-        // Thread Pool Status
-        if (scheduler != null) {
-            System.out.println("┌─ THREAD POOL STATUS ──────────────────────────────────────────────────┐");
-            if (scheduler instanceof ThreadPoolExecutor) {
-                ThreadPoolExecutor tpe = (ThreadPoolExecutor) scheduler;
-                System.out.printf("│ Scheduled Pool: %d tasks scheduled%n", 
-                    ((ScheduledThreadPoolExecutor) scheduler).getQueue().size());
-            }
-            System.out.println("└────────────────────────────────────────────────────────────────────────┘");
-            System.out.println();
+        // Auto-refresh handled by background thread; no countdown needed here.
+    }
+
+    /**
+     * Helper that reads from stats cache and updates hit/miss counters.
+     */
+    private Object getFromCache(String key) {
+        Object value = statsCache.get(key);
+        if (value != null) {
+            cacheHits.incrementAndGet();
+        } else {
+            cacheMisses.incrementAndGet();
         }
-        
-        // Manual refresh mode - no countdown needed
+        return value;
     }
     
     /**
