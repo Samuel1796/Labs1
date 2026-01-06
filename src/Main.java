@@ -11,20 +11,27 @@ import java.util.*;
 
 import utilities.FileIOUtils;
 import utilities.Logger;
+<<<<<<< HEAD
+=======
 import services.system.AuditTrailService;
+>>>>>>> main
 import java.nio.file.Paths;
 
-
-
-// Main application class for Student Grade Management System.
 public class Main {
     public static void main(String[] args) throws IOException {
+<<<<<<< HEAD
+        Logger.initialize();
+        Logger.info("APPLICATION: Starting - Student Grade Management System");
+        
+        
+=======
         // Initialize Logger first
         Logger.initialize();
         Logger.info("=== Student Grade Management System Started ===");
         Logger.info("Application initialized at: " + new java.util.Date());
         
         // Initialize services
+>>>>>>> main
         StudentService studentService = new StudentService();
         GradeService gradeService = new GradeService(500);
         MenuService menuService = new MenuService();
@@ -64,6 +71,12 @@ public class Main {
         services.file.GradeImportExportService gradeImportExportService = new services.file.GradeImportExportService(gradeService);
         BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeImportExportService, format, outputDir, threadCount);
 
+<<<<<<< HEAD
+        try {
+            while (running) {
+                try {
+                    menuService.displayMainMenu();
+=======
         // Add shutdown hook to properly close logger
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Logger.shutdown();
@@ -72,10 +85,32 @@ public class Main {
         
         while (running) {
             menuService.displayMainMenu();
+>>>>>>> main
 
-            int choice = sc.nextInt();
-            sc.nextLine();
-            running = menuHandler.handleMenu(choice);
+                    int choice = sc.nextInt();
+                    sc.nextLine();
+                    running = menuHandler.handleMenu(choice);
+                } catch (java.util.InputMismatchException e) {
+                    Logger.warn("APPLICATION: Invalid input format - " + e.getMessage());
+                    System.out.println("Invalid input. Please enter a number.");
+                    sc.nextLine();
+                } catch (Exception e) {
+                    Logger.error("APPLICATION: Error in menu handler - " + e.getMessage(), e);
+                    System.out.println("An error occurred: " + e.getMessage());
+                    System.out.println("Please try again.");
+                }
+            }
+        } catch (Exception e) {
+            Logger.error("APPLICATION: Fatal error in main loop - " + e.getMessage(), e);
+            System.out.println("A fatal error occurred: " + e.getMessage());
+        } finally {
+            if (!running) {
+                System.out.println("\nExiting program...");
+                Logger.info("APPLICATION: Exiting - exporting logs");
+                Logger.shutdown();
+                System.out.println("Logs exported successfully.");
+                System.exit(0);
+            }
         }
         
         // Cleanup on exit

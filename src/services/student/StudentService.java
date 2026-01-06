@@ -6,6 +6,13 @@ import exceptions.StudentNotFoundException;
 
 import java.util.*;
 
+<<<<<<< HEAD
+import utilities.FileIOUtils;
+import utilities.Logger;
+import java.nio.file.Paths;
+
+=======
+>>>>>>> main
 /**
  * Service class for managing student data.
  */
@@ -19,19 +26,38 @@ public class StudentService {
      * @param student The student to add
      */
     public void addStudent(Student student) throws DuplicateStudentException {
+        long startTime = System.currentTimeMillis();
         String normalizedId = student.getStudentID().toUpperCase();
         if (studentMap.containsKey(normalizedId)) {
+            long duration = System.currentTimeMillis() - startTime;
+            Logger.logAudit("ADD_STUDENT", "Add student: " + student.getStudentID(), duration, false, 
+                "Duplicate student ID: " + normalizedId);
             throw new DuplicateStudentException(student.getName(), student.getEmail());
         }
         studentMap.put(normalizedId, student);
+        long duration = System.currentTimeMillis() - startTime;
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("studentCount", studentMap.size());
+        Logger.logPerformance("ADD_STUDENT", duration, metrics);
+        Logger.logAudit("ADD_STUDENT", "Add student: " + student.getStudentID(), duration, true, 
+            "Student added successfully");
     }
 
     public Student findStudentById(String studentID) throws StudentNotFoundException {
+        long startTime = System.currentTimeMillis();
         String normalizedId = studentID.toUpperCase();
         Student student = studentMap.get(normalizedId);
+        long duration = System.currentTimeMillis() - startTime;
         if (student == null) {
+            Logger.logAudit("FIND_STUDENT", "Find student: " + studentID, duration, false, 
+                "Student not found: " + studentID);
             throw new StudentNotFoundException(studentID);
         }
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("studentCount", studentMap.size());
+        Logger.logPerformance("FIND_STUDENT", duration, metrics);
+        Logger.logAudit("FIND_STUDENT", "Find student: " + studentID, duration, true, 
+            "Student found: " + studentID);
         return student;
     }
 

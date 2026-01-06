@@ -1,0 +1,6 @@
+gradeID,studentID,subjectName,subjectType,value,date
+GRD0281,STU057,Mathematics,Core Subject,58.0,1767714161258
+GRD0282,STU057,English,Core Subject,60.0,1767714161259
+GRD0283,STU057,Science,Core Subject,56.0,1767714161260
+GRD0284,STU057,Art,Elective Subject,62.0,1767714161261
+GRD0285,STU057,Physical Education,Elective Subject,65.0,1767714161261

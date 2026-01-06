@@ -281,6 +281,89 @@ For all pattern-based searches, the high-level structure is:
 
 ---
 
+<<<<<<< HEAD
+## 9. Logging System (`utilities.Logger`)
+
+### 9.1 Log Initialization and File Rotation
+
+- **Code**: `initialize()` and `rotateLogFile()`  
+  - `@Logger.java (35–104, 109–170)`
+- **Complexity**:
+  - Logger initialization: **O(1)** time for directory creation and handler setup.
+  - Daily file rotation: **O(1)** time per rotation check; file creation is **O(1)**.
+  - Console handler setup: **O(1)** time.
+- **Thread Safety**: Uses synchronized methods for initialization and rotation to ensure thread-safe log file management.
+
+### 9.2 Logging Operations
+
+- **Code**: `info()`, `warn()`, `error()`, `debug()`, `logPerformance()`, `logAudit()`  
+  - `@Logger.java (203–322)`
+- **Complexity**:
+  - All logging operations: **O(1)** average time for message formatting and handler dispatch.
+  - File I/O: **O(L)** where \(L\) is message length (buffered writes).
+  - Console output: **O(L)** where \(L\) is message length.
+- **Performance Impact**: Logging adds minimal overhead to operations; performance metrics are tracked with timestamps for audit trail analysis.
+
+### 9.3 Audit Trail Logging
+
+- **Code**: `logAudit()` used throughout system operations  
+  - Integrated in `StudentService`, `GradeService`, `BatchReportTaskManager`, `TaskScheduler`
+- **Complexity**:
+  - Audit log entry creation: **O(1)** time.
+  - Concurrent logging: Uses thread-safe handlers, **O(1)** average per operation.
+  - File writes are buffered and flushed periodically to minimize I/O overhead.
+- **Usage**: All critical operations (add student, record grade, batch export, scheduled tasks) log audit entries with timestamps, operation type, success/failure status, and execution time.
+
+### 9.4 Performance Monitoring
+
+- **Code**: `logPerformance()` and `logPerformanceWithCollections()`  
+  - `@Logger.java (284–312)`
+- **Complexity**:
+  - Performance metric logging: **O(1)** time for metric collection and formatting.
+  - Thread pool metrics: **O(1)** time to query `ThreadPoolExecutor` statistics (active threads, queue size, pool size).
+  - Collection size tracking: **O(1)** time to include collection sizes in metrics.
+- **Metrics Tracked**: Operation duration, collection sizes, thread pool statistics (active threads, pool size, queue size), and operation success/failure rates.
+
+---
+
+## 10. Caching System (`utilities.CacheUtils`)
+
+### 10.1 Cache Management
+
+- **Code**: `getStatisticsCache()`, `getStudentCache()`, `getPerformanceCache()`  
+  - `@CacheUtils.java (29–45)`
+- **Complexity**:
+  - Cache retrieval: **O(1)** average time (direct static field access).
+  - Cache operations: All LRU cache operations (get, put, invalidate) are **O(1)** average as documented in section 8.
+- **Cache Types**: Statistics cache, student data cache, and performance metrics cache, each with configurable size (default 150 entries).
+
+### 10.2 Executor Framework Management
+
+- **Code**: `getFixedThreadPool()`, `getCachedThreadPool()`, `getScheduledThreadPool()`  
+  - `@CacheUtils.java (149–161)`
+- **Complexity**:
+  - Thread pool retrieval: **O(1)** time (direct static field access).
+  - Thread pool creation: **O(1)** time during initialization.
+  - Thread pool statistics: **O(1)** time to query `ThreadPoolExecutor` metrics.
+- **Thread Pools**:
+  - **Fixed Thread Pool**: Fixed size (default 10 threads) for predictable concurrent task execution.
+  - **Cached Thread Pool**: Dynamically sized for short-lived tasks with automatic thread reuse.
+  - **Scheduled Thread Pool**: Fixed size (default 5 threads) for periodic and delayed task execution.
+- **Usage**: Thread pools are cached and reused across the system for batch operations, scheduled tasks, and concurrent processing, reducing thread creation overhead.
+
+### 10.3 Thread Pool Statistics
+
+- **Code**: `getThreadPoolStatistics()`  
+  - `@CacheUtils.java (163–201)`
+- **Complexity**:
+  - Statistics collection: **O(p)** where \(p\) is number of thread pools (typically 3) → effectively **O(1)**.
+  - Metric queries: **O(1)** per metric (pool size, active count, queue size, completed task count).
+- **Metrics Tracked**: Pool size, active thread count, queue size, completed task count, core pool size, and maximum pool size for each thread pool.
+
+---
+
+## 11. Practical Impact & Guidelines
+=======
 ## 9. Logging & Cache Management
 
 ### 9.1 Logger (`utilities.Logger`)
@@ -316,20 +399,45 @@ For all pattern-based searches, the high-level structure is:
 ---
 
 ## 10. Practical Impact & Guidelines
+>>>>>>> main
 
 - **Small–medium class sizes (tens to low hundreds of students)**:
   - All operations (search, analytics, scheduling) are comfortably fast; even O(n * g) scans are acceptable.
+  - Logging overhead is minimal (< 1ms per operation) and provides valuable audit trail.
+  - Caching improves repeated lookups and statistics calculations.
   - Simpler, linear algorithms (e.g., duplicate checks, subject search) favor clarity over micro-optimizations.
 
 - **Large classes (thousands of students, tens of thousands of grades)**:
   - Analytics paths with **O(g log g)** behavior (median, full statistics refresh) become dominant.
   - Batch reporting and scheduled GPA recomputation benefit significantly from thread pools (`ExecutorService`) and from the LRU cache.
+  - Logging scales linearly with operation count; daily log file rotation prevents unbounded growth.
+  - Thread pool caching reduces thread creation overhead for concurrent operations.
   - Consider increasing thread pool sizes and scheduler intervals, or adding additional indexes/caches if the workload grows.
 
 - **When extending the system**:
   - Prefer operations that are **O(1)** or **O(log n)** on shared collections (`HashMap`, `ConcurrentHashMap`, `TreeMap`, `PriorityQueue`) for hot paths.
+<<<<<<< HEAD
+  - Use the centralized logging system (`Logger`) for all operations to maintain audit trail and performance monitoring.
+  - Leverage cached thread pools from `CacheUtils` for concurrent operations instead of creating new executors.
+  - Be explicit about any O(n * g) or O(n²) behavior in comments, as in `StudentService`, to make tradeoffs clear.
+  - Reuse existing utilities (validation, file I/O, scheduler, cache, logging) instead of re-implementing ad-hoc logic in new services.
+
+- **Logging Best Practices**:
+  - Use `Logger.info()` for general information and operation start/completion.
+  - Use `Logger.logAudit()` for all critical operations (add, update, delete) with success/failure status.
+  - Use `Logger.logPerformance()` for operations where performance monitoring is important.
+  - Use `Logger.error()` for exceptions and error conditions.
+  - Daily log file rotation ensures manageable log file sizes and easy historical analysis.
+
+- **Caching Best Practices**:
+  - Use appropriate cache types (statistics, student, performance) for different data access patterns.
+  - Monitor cache hit rates using `getCacheStatistics()` to optimize cache sizes.
+  - Use cached thread pools from `CacheUtils` for concurrent operations to avoid thread creation overhead.
+  - Clear caches when data is updated to maintain consistency.
+=======
   - Use `Logger` for all logging operations to ensure consistent audit trails and performance monitoring.
   - Use `CacheUtils` for centralized cache management instead of creating ad-hoc caching solutions.
   - Reuse existing utilities (validation, file I/O, scheduler, cache, logger) instead of re-implementing ad-hoc logic in new services.
+>>>>>>> main
 
 

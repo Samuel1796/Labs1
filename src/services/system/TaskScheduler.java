@@ -3,9 +3,9 @@ package services.system;
 import models.Student;
 import services.analytics.StatisticsService;
 import services.file.GradeService;
+import utilities.Logger;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.text.SimpleDateFormat;
 import java.io.*;
 
@@ -126,14 +126,13 @@ public class TaskScheduler {
         this.gradeService = gradeService;
         this.students = students;
         
-        // Create scheduler with 3 threads (sufficient for periodic tasks)
         scheduler = Executors.newScheduledThreadPool(3, r -> {
             Thread t = new Thread(r, "TaskScheduler-Thread");
             t.setDaemon(true);
             return t;
         });
         
-        // Load persisted tasks
+        Logger.info("TASK_SCHEDULER: Initialized with 3 threads");
         loadPersistedTasks();
     }
     
@@ -151,22 +150,21 @@ public class TaskScheduler {
         Runnable taskRunnable = createTaskRunnable(task);
         
         if (scheduleType == ScheduleType.DAILY || scheduleType == ScheduleType.WEEKLY) {
-            // Fixed rate: executes at fixed intervals
             future = scheduler.scheduleAtFixedRate(taskRunnable, initialDelay, period, TimeUnit.SECONDS);
         } else if (scheduleType == ScheduleType.HOURLY) {
-            // Fixed rate for hourly tasks
             future = scheduler.scheduleAtFixedRate(taskRunnable, initialDelay, period, TimeUnit.SECONDS);
         }
         
         task.setFuture(future);
         task.setNextExecution(new Date(System.currentTimeMillis() + (initialDelay * 1000)));
         scheduledTasks.put(taskId, task);
-        // Maintain a priority queue for quick access to the next task by execution time.
         taskQueue.offer(task);
         
-        // Persist task
         persistTasks();
         
+        Logger.info("SCHEDULE_TASK: Task scheduled - " + taskName + " (ID: " + taskId + ")");
+        Logger.logAudit("SCHEDULE_TASK", "Schedule task " + taskName, 0, true, 
+            "Task ID: " + taskId + ", Type: " + taskType + ", Schedule: " + scheduleType);
         System.out.println("Task scheduled: " + taskName + " (ID: " + taskId + ")");
     }
     
@@ -183,19 +181,19 @@ public class TaskScheduler {
                 switch (task.getTaskType()) {
                     case GPA_RECALCULATION:
                         details = "Recalculated GPA for " + students.size() + " students";
-                        // Recalculate GPAs (simulated - in real system would update database)
                         for (Student student : students) {
                             student.calculateAverage(gradeService);
                         }
                         success = true;
+                        Logger.debug("SCHEDULED_TASK: GPA recalculation completed for " + students.size() + " students");
                         break;
                         
                     case STATISTICS_CACHE_REFRESH:
                         details = "Refreshed statistics cache";
-                        // Refresh statistics (simulated)
                         statisticsService.calculateMean();
                         statisticsService.calculateMedian();
                         success = true;
+                        Logger.debug("SCHEDULED_TASK: Statistics cache refreshed");
                         break;
                         
                     case BATCH_REPORT_GENERATION:
@@ -216,18 +214,21 @@ public class TaskScheduler {
                 
                 long duration = System.currentTimeMillis() - startTime;
                 
-                // Update task status
                 task.setLastExecution(new Date());
                 task.setLastExecutionDuration(duration);
                 task.setLastExecutionStatus(success ? "SUCCESS" : "FAILED");
                 
-                // Record execution
                 TaskExecution execution = new TaskExecution(
                     task.getTaskId(), task.getTaskName(), duration, success, details
                 );
                 executionHistory.add(execution);
                 
-                // Log execution
+                Map<String, Object> metrics = new HashMap<>();
+                metrics.put("taskType", task.getTaskType().toString());
+                metrics.put("scheduleType", task.getScheduleType().toString());
+                Logger.logPerformance("SCHEDULED_TASK_EXECUTION", duration, metrics);
+                Logger.logAudit("SCHEDULED_TASK", "Execute " + task.getTaskName(), duration, success, details);
+                
                 logExecution(execution);
                 
                 // Send notification (simulated)
@@ -247,6 +248,9 @@ public class TaskScheduler {
                     task.getTaskId(), task.getTaskName(), duration, false, "Error: " + e.getMessage()
                 );
                 executionHistory.add(execution);
+                Logger.error("SCHEDULED_TASK: Execution failed - " + task.getTaskName() + " - " + e.getMessage(), e);
+                Logger.logAudit("SCHEDULED_TASK", "Execute " + task.getTaskName(), duration, false, 
+                    "Error: " + e.getMessage());
                 logExecution(execution);
             }
         };

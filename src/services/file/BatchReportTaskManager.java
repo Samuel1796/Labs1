@@ -3,6 +3,7 @@ package services.file;
 import models.Student;
 import models.Grade;
 import utilities.FileIOUtils;
+import utilities.Logger;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.io.*;
@@ -55,17 +56,16 @@ public class BatchReportTaskManager {
         this.totalTasks = students.size();
         this.threadCount = threadCount;
         this.executor = Executors.newFixedThreadPool(threadCount);
-        // Ensure output directory exists
         new java.io.File(outputDir).mkdirs();
+        Logger.info("BATCH_REPORT_MANAGER: Initialized with " + totalTasks + " tasks, " + threadCount + " threads");
     }
 
     /** Starts the concurrent batch export for all students and waits until all reports finish. */
     public void startBatchExport() {
         long startTime = System.currentTimeMillis();
+        Logger.info("BATCH_EXPORT: Starting batch export for " + totalTasks + " students");
         List<Future<?>> futures = new ArrayList<>();
         
-        // Submit all export tasks to thread pool
-        // Each task is a lambda that runs in a worker thread
         for (Student student : students) {
             futures.add(executor.submit(() -> {
                 // Task execution context: runs in worker thread
@@ -137,16 +137,26 @@ public class BatchReportTaskManager {
                     // Update status: completed or failed
                     threadStatus.put(student.getStudentID(), success ? "completed (" + threadName + ")" : "failed (" + threadName + ")");
                 } catch (Exception e) {
-                    // Exception handling: log error and mark as failed
                     threadStatus.put(student.getStudentID(), "failed (" + threadName + ")");
-                    failedTasks.incrementAndGet(); // Atomic increment (thread-safe)
-                    System.out.println("Export failed for " + student.getStudentID() + ": " + e.getMessage());
+                    failedTasks.incrementAndGet();
+                    long duration = System.currentTimeMillis() - t0;
+                    Logger.error("BATCH_EXPORT: Export failed for " + student.getStudentID() + " - " + e.getMessage(), e);
+                    Logger.logAudit("BATCH_EXPORT", "Export report for " + student.getStudentID(), duration, false, 
+                        "Error: " + e.getMessage());
                 }
                 
-                // Record execution time for performance metrics
                 long t1 = System.currentTimeMillis();
-                reportTimes.put(student.getStudentID(), t1 - t0);
-                completedTasks.incrementAndGet(); // Atomic increment (thread-safe)
+                long duration = t1 - t0;
+                reportTimes.put(student.getStudentID(), duration);
+                completedTasks.incrementAndGet();
+                if (success) {
+                    Map<String, Object> metrics = new HashMap<>();
+                    metrics.put("collectionSize", totalTasks);
+                    metrics.put("collectionName", "students");
+                    Logger.logPerformanceWithCollections("BATCH_EXPORT_STUDENT", duration, totalTasks, "students", executor);
+                    Logger.logAudit("BATCH_EXPORT", "Export report for " + student.getStudentID(), duration, true, 
+                        "Report generated successfully");
+                }
             }));
         }
     
@@ -163,12 +173,20 @@ public class BatchReportTaskManager {
             try { Thread.sleep(50); } catch (InterruptedException ignored) {} // 50ms for smoother real-time updates
         }
     
-        // Final status update and summary
-        showProgress(startTime); // Final update
-        System.out.println(); // New line after progress bar
+        showProgress(startTime);
+        System.out.println();
         System.out.println("BATCH GENERATION COMPLETED!");
+        long totalDuration = System.currentTimeMillis() - startTime;
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("totalTasks", totalTasks);
+        metrics.put("completedTasks", completedTasks.get());
+        metrics.put("failedTasks", failedTasks.get());
+        metrics.put("threadCount", threadCount);
+        Logger.logPerformance("BATCH_EXPORT_ALL", totalDuration, metrics);
+        Logger.logAudit("BATCH_EXPORT_ALL", "Batch export completed", totalDuration, true, 
+            "Total tasks: " + totalTasks + ", Completed: " + completedTasks.get() + ", Failed: " + failedTasks.get());
         showSummary(startTime);
-        shutdown(); // Gracefully shutdown thread pool
+        shutdown();
     }
     
     /**

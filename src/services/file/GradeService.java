@@ -3,6 +3,7 @@ package services.file;
 import models.*;
 import exceptions.*;
 import services.student.StudentService;
+import utilities.Logger;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
@@ -33,11 +34,21 @@ public class GradeService {
      * @throws InvalidGradeException if grade value is outside valid range (0-100).
      */
     public boolean recordGrade(Grade grade, StudentService studentService) {
+<<<<<<< HEAD
+        long startTime = System.currentTimeMillis();
+=======
+>>>>>>> main
         if (gradeCount >= grades.length) {
+            long duration = System.currentTimeMillis() - startTime;
+            Logger.logAudit("RECORD_GRADE", "Record grade: " + grade.getGradeID(), duration, false, 
+                "Grade database full");
             throw new AppExceptions("Grade database full!");
         }
         
         if (grade.getValue() < 0 || grade.getValue() > 100) {
+            long duration = System.currentTimeMillis() - startTime;
+            Logger.logAudit("RECORD_GRADE", "Record grade: " + grade.getGradeID(), duration, false, 
+                "Invalid grade value: " + grade.getValue());
             throw new InvalidGradeException(grade.getValue());
         }
         
@@ -64,6 +75,13 @@ public class GradeService {
                 student.enrollSubject(subject);
             }
         }
+        long duration = System.currentTimeMillis() - startTime;
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("gradeCount", gradeCount);
+        metrics.put("collectionName", "grades");
+        Logger.logPerformance("RECORD_GRADE", duration, metrics);
+        Logger.logAudit("RECORD_GRADE", "Record grade: " + grade.getGradeID(), duration, true, 
+            "Grade recorded for student: " + grade.getStudentID() + ", subject: " + grade.getSubjectName());
         return true;
     }
 
