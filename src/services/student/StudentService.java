@@ -4,11 +4,7 @@ import models.*;
 import exceptions.DuplicateStudentException;
 import exceptions.StudentNotFoundException;
 
-import java.io.IOException;
 import java.util.*;
-
-import utilities.FileIOUtils;
-import java.nio.file.Paths;
 
 /**
  * Service class for managing student data.
@@ -43,34 +39,15 @@ public class StudentService {
     /**
      * Finds a subject by its name and type across all students in the system.
      * 
-     * This method implements a linear search algorithm that:
-     * 1. Iterates through all students
-     * 2. Checks each student's enrolled subjects
-     * 3. Matches subject name (case-insensitive) and type (by class instance)
-     * 4. Returns first matching subject found
-     * 
-     * Search Strategy:
-     * - Name matching: case-insensitive comparison for flexibility
-     * - Type matching: uses instanceof to check class hierarchy
-     * - Supports multiple type string formats for backward compatibility
-     *
-     * 
-     * Design Considerations:
-     * - Returns first match (assumes subject instances are equivalent)
-     * - Null-safe: handles null subjects and null lists gracefully
-     * - Type checking uses instanceof for reliable class hierarchy detection
-     * 
      * @param name The subject name to search for (case-insensitive)
      * @param type The type ("Core", "Elective", "Core Subject", "Elective Subject")
      * @return The matching Subject instance, or null if not found
      */
 
     public Subject findSubjectByNameAndType(String name, String type) {
-        // Linear search: iterate through all students
         for (Student s : getStudents()) {
             List<Subject> enrolledSubjects = s.getEnrolledSubjects();
             
-            // Null-safe check: handle students with no enrolled subjects
             if (enrolledSubjects != null) {
                 for (Subject subj : enrolledSubjects) {
                     if (subj != null && subj.getSubjectName().equalsIgnoreCase(name)) {
@@ -78,14 +55,12 @@ public class StudentService {
                                 (type.equalsIgnoreCase("Elective") && subj instanceof ElectiveSubject) ||
                                 (type.equalsIgnoreCase("Core Subject") && subj instanceof CoreSubject) ||
                                 (type.equalsIgnoreCase("Elective Subject") && subj instanceof ElectiveSubject)) {
-                            // Match found: return first matching subject
                             return subj;
                         }
                     }
                 }
             }
         }
-        // No match found: return null
         return null;
     }
 
@@ -118,13 +93,6 @@ public class StudentService {
         return false;
     }
 
-    /**
-     * Validates the format of an email address.
-     * @return true if valid, false otherwise
-     */
-    public boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-    }
 
     /**
      * Searches for students by partial or full name match using case-insensitive substring matching.
@@ -147,36 +115,12 @@ public class StudentService {
      */
     public Student[] searchStudentsByName(String namePart) {
         return studentMap.values().stream()
-                // Filter: keep only students whose name contains search term
-                // Case-insensitive: convert both to lowercase for comparison
-                // contains() performs substring matching (not just prefix/suffix)
                 .filter(s -> s.getName().toLowerCase().contains(namePart.toLowerCase()))
-                // Collect results into array
-                // toArray() creates new array with exact size needed
                 .toArray(Student[]::new);
     }
 
     /**
      * Searches for students whose average grade falls within a specified range (inclusive).
-     * 
-     * This method implements range-based filtering:
-     * - Calculates each student's average grade using GradeService
-     * - Filters students whose average is within [min, max] range
-     * - Returns all matching students
-     * 
-     * Range Matching:
-     * - Inclusive bounds: students with exactly min or max are included
-     * - Range validation: assumes min <= max (caller's responsibility)
-     * - Handles edge cases: min = max finds students with exact average
-     * Optimization Opportunities:
-     * - Cache average grades to avoid recalculation
-     * - Pre-compute averages during grade updates
-     * - Use indexed data structure for range queries
-     * 
-     * Use Cases:
-     * - Find high performers: min=90, max=100
-     * - Find students needing support: min=0, max=60
-     * - Find average students: min=70, max=80
      * 
      * @param min Minimum average grade (inclusive, 0-100)
      * @param max Maximum average grade (inclusive, 0-100)
@@ -186,12 +130,7 @@ public class StudentService {
     public Student[] searchStudentsByGradeRange(double min, double max, services.file.GradeService gradeService) {
         return studentMap.values().stream()
                 .filter(s -> {
-                    // Calculate average for this student
-                    // This is called for every student - consider caching for performance
                     double avg = s.calculateAverage(gradeService);
-                    
-                    // Range check: inclusive bounds
-                    // Returns true if average is within [min, max]
                     return avg >= min && avg <= max;
                 })
                 .toArray(Student[]::new);
@@ -221,12 +160,7 @@ public class StudentService {
      * @return Array of Student objects matching the specified type
      */
     public Student[] searchStudentsByType(boolean honors) {
-        // Stream API with type filtering; single pass O(n) over all students.
         return studentMap.values().stream()
-                // Type check: compare desired type with actual instance type
-                // honors == (s instanceof HonorsStudent) ensures boolean match
-                // If honors=true, keeps only HonorsStudent instances
-                // If honors=false, keeps only RegularStudent instances
                 .filter(s -> honors == (s instanceof HonorsStudent))
                 .toArray(Student[]::new);
     }
@@ -239,11 +173,9 @@ public class StudentService {
         System.out.println("| STUDENT ID  | NAME                  | TYPE            | AVG GRADE | STATUS       | ENROLLED SUBJECTS    | PASSING GRADE | Honors Eligible     |");
         System.out.println("|_______________________________________________________________________________________________________________________________________________|");
     
-        // Copy to ArrayList and sort by Student ID (overall O(n log n) for ordering plus O(n) copy).
         List<Student> sortedStudents = new ArrayList<>(studentMap.values());
         sortedStudents.sort(Comparator.comparing(Student::getStudentID, String.CASE_INSENSITIVE_ORDER));
 
-        // If there are no students, show a clear empty-state message instead of a blank table
         if (sortedStudents.isEmpty()) {
             System.out.println("| No students found. Please add students first.                                                                                               |");
             System.out.println("|=============================================================================================================================================|");

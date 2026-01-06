@@ -8,15 +8,6 @@ import java.text.SimpleDateFormat;
 
 /**
  * Thread-safe LRU (Least Recently Used) Cache implementation.
- * 
- * Features:
- * - ConcurrentHashMap for thread-safe operations
- * - LRU eviction policy
- * - Maximum cache size (150 entries)
- * - Cache statistics (hit rate, miss rate, eviction count)
- * - Memory usage tracking
- * - Cache warming support
- * - Manual cache clear
  */
 public class LRUCache<K, V> {
     
@@ -53,7 +44,9 @@ public class LRUCache<K, V> {
         this.cache = new ConcurrentHashMap<>(maxSize);
     }
     
-    /** Gets a value from the cache in O(1) average time and updates access time for LRU tracking. */
+    /**
+     * Gets a value from the cache and updates access time for LRU tracking.
+     */
     public V get(K key) {
         long startTime = System.nanoTime();
         CacheEntry<V> entry = cache.get(key);
@@ -74,7 +67,9 @@ public class LRUCache<K, V> {
         }
     }
     
-    /** Inserts or replaces a value (avg O(1)); evicts one least-recently-used entry in O(n) when full. */
+    /**
+     * Inserts or replaces a value and evicts least-recently-used entry when full.
+     */
     public void put(K key, V value) {
         synchronized (cache) {
             // Check if we need to evict
@@ -86,7 +81,9 @@ public class LRUCache<K, V> {
         }
     }
     
-    /** Scans entries to remove the least recently used key (O(n) over current cache size). */
+    /**
+     * Scans entries to remove the least recently used key.
+     */
     private void evictLRU() {
         K lruKey = null;
         long oldestAccessTime = Long.MAX_VALUE;

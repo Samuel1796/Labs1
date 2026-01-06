@@ -1,28 +1,13 @@
 package utilities;
 
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 /**
  * Utility class for comprehensive input validation using regex patterns.
- * 
- * This class implements US-3: Comprehensive Regex Input Validation.
- * All patterns are compiled once and reused for performance efficiency.
- * 
- * Design Pattern:
- * - Singleton-like pattern: static compiled patterns (thread-safe)
- * - Factory pattern: static validation methods
- * - Strategy pattern: different validation strategies per data type
- * 
- * Performance:
- * - Patterns compiled once at class load time (efficient)
- * - Reused across all validation calls (no recompilation overhead)
- * - Thread-safe: Pattern objects are immutable
  */
 public class ValidationUtils {
     
-    // Compiled regex patterns - compiled once and reused for performance
-    // Pattern.compile() is expensive, so we compile once and cache
+    // Compiled regex patterns
     
     /** Student ID Pattern: STU followed by exactly 3 digits (e.g., STU001, STU042, STU999) */
     private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^STU\\d{3}$");

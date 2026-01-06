@@ -1,9 +1,9 @@
 package services.system;
 
+import utilities.Logger;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.text.SimpleDateFormat;
 import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -35,10 +35,6 @@ public class AuditTrailService {
     private final AtomicLong totalExecutionTime = new AtomicLong(0);
     
     private volatile boolean running = true;
-    private String currentLogFile;
-    private long currentLogFileSize = 0;
-    private static final long MAX_LOG_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    private static final String LOG_DIR = "./data/audit_logs";
     
     /**
      * Audit log entry with all required information.
@@ -80,24 +76,14 @@ public class AuditTrailService {
     }
     
     public AuditTrailService() {
-        // Create log directory
-        try {
-            Files.createDirectories(Paths.get(LOG_DIR));
-        } catch (IOException e) {
-            System.err.println("Failed to create log directory: " + e.getMessage());
-        }
+        Logger.initialize();
         
-        // Initialize current log file
-        updateLogFile();
-        
-        // Create single-threaded executor for sequential log writing
         writerExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "AuditTrail-Writer");
             t.setDaemon(true);
             return t;
         });
         
-        // Start background writer thread
         startBackgroundWriter();
     }
     
@@ -106,16 +92,13 @@ public class AuditTrailService {
      */
     public void logOperation(String operationType, String userAction, long executionTime,
                             boolean success, String details) {
-        // Use threadId() instead of deprecated getId()
         String threadId = String.valueOf(Thread.currentThread().threadId());
         
         AuditEntry entry = new AuditEntry(threadId, operationType, userAction,
                                          executionTime, success, details);
         
-        // Add to queue (non-blocking, thread-safe)
         logQueue.offer(entry);
         
-        // Update statistics
         totalOperations.incrementAndGet();
         if (success) {
             successfulOperations.incrementAndGet();
@@ -123,6 +106,8 @@ public class AuditTrailService {
             failedOperations.incrementAndGet();
         }
         totalExecutionTime.addAndGet(executionTime);
+        
+        Logger.logAudit(operationType, userAction, executionTime, success, details);
     }
     
     /**
@@ -158,60 +143,13 @@ public class AuditTrailService {
     }
     
     /**
-     * Writes batch of entries to file.
+     * Writes batch of entries to file using Logger.
      */
     private synchronized void writeBatchToFile(List<AuditEntry> batch) {
-        try {
-            // Check if we need to rotate log file
-            if (currentLogFileSize > MAX_LOG_FILE_SIZE) {
-                rotateLogFile();
-            }
-            
-            // Append to current log file
-            try (PrintWriter writer = new PrintWriter(
-                    new FileWriter(currentLogFile, true))) {
-                for (AuditEntry entry : batch) {
-                    writer.println(entry.toString());
-                    currentLogFileSize += entry.toString().length() + 1; // +1 for newline
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Failed to write audit log: " + e.getMessage());
+        for (AuditEntry entry : batch) {
+            Logger.logAudit(entry.getOperationType(), entry.getUserAction(), 
+                          entry.getExecutionTime(), entry.isSuccess(), entry.getDetails());
         }
-    }
-    
-    /**
-     * Updates current log file (creates new file if needed).
-     */
-    private void updateLogFile() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String dateStr = sdf.format(new Date());
-        currentLogFile = LOG_DIR + "/audit_" + dateStr + ".log";
-        currentLogFileSize = 0;
-        
-        // Check if file exists and get its size
-        File file = new File(currentLogFile);
-        if (file.exists()) {
-            currentLogFileSize = file.length();
-        }
-    }
-    
-    /**
-     * Rotates log file (creates new file when size limit reached).
-     */
-    private void rotateLogFile() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
-        String timestamp = sdf.format(new Date());
-        String rotatedFile = LOG_DIR + "/audit_" + timestamp + ".log";
-        
-        // Rename current file
-        File current = new File(currentLogFile);
-        if (current.exists()) {
-            current.renameTo(new File(rotatedFile));
-        }
-        
-        // Create new log file
-        updateLogFile();
     }
     
     /**
@@ -249,67 +187,170 @@ public class AuditTrailService {
      */
     private List<AuditEntry> readRecentEntries(int count, String operationType, String threadId) {
         List<AuditEntry> entries = new ArrayList<>();
-        
-        try {
-            // Read from current log file and recent rotated files
-            File logDir = new File(LOG_DIR);
-            File[] logFiles = logDir.listFiles((dir, name) -> name.startsWith("audit_") && name.endsWith(".log"));
-            
-            if (logFiles == null) return entries;
-            
-            // Sort by modification time (newest first)
-            Arrays.sort(logFiles, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
-            
-            // Read from files until we have enough entries
-            for (File logFile : logFiles) {
-                if (entries.size() >= count) break;
-                
-                try (BufferedReader reader = Files.newBufferedReader(logFile.toPath())) {
-                    String line;
-                    List<String> fileLines = new ArrayList<>();
-                    while ((line = reader.readLine()) != null) {
-                        fileLines.add(line);
-                    }
-                    
-                    // Process lines in reverse (newest first)
-                    for (int i = fileLines.size() - 1; i >= 0 && entries.size() < count; i--) {
-                        AuditEntry entry = parseEntry(fileLines.get(i));
-                        if (entry != null) {
-                            // Apply filters
-                            if (operationType != null && !entry.getOperationType().equals(operationType)) {
-                                continue;
-                            }
-                            if (threadId != null && !entry.getThreadId().equals(threadId)) {
-                                continue;
-                            }
-                            entries.add(entry);
-                        }
-                    }
-                }
+        List<String> logLines = readLogsFromFiles(count, operationType, threadId);
+        for (String line : logLines) {
+            AuditEntry entry = parseEntry(line);
+            if (entry != null) {
+                entries.add(entry);
             }
-        } catch (IOException e) {
-            System.err.println("Failed to read audit log: " + e.getMessage());
         }
-        
         return entries;
     }
     
     /**
-     * Parses log entry from string (simplified - in production use structured format).
+     * Reads logs from files in real-time.
+     */
+    public List<String> readLogsFromFiles(int maxLines, String operationType, String threadId) {
+        List<String> logLines = new ArrayList<>();
+        
+        try {
+            String logDir = Logger.getLogDirectory();
+            Path logPath = Paths.get(logDir);
+            
+            if (!Files.exists(logPath)) {
+                return logLines;
+            }
+            
+            List<Path> logFiles = new ArrayList<>();
+            Files.list(logPath)
+                .filter(p -> p.toString().endsWith(".log"))
+                .sorted((a, b) -> {
+                    try {
+                        return Files.getLastModifiedTime(b).compareTo(Files.getLastModifiedTime(a));
+                    } catch (IOException e) {
+                        return 0;
+                    }
+                })
+                .forEach(logFiles::add);
+            
+            for (Path logFile : logFiles) {
+                if (logLines.size() >= maxLines) break;
+                
+                try {
+                    List<String> fileLines = Files.readAllLines(logFile);
+                    
+                    for (int i = fileLines.size() - 1; i >= 0 && logLines.size() < maxLines; i--) {
+                        String line = fileLines.get(i);
+                        if (line.contains("AUDIT:")) {
+                            if (operationType != null && !line.contains(operationType)) {
+                                continue;
+                            }
+                            if (threadId != null && !line.contains("Thread:" + threadId)) {
+                                continue;
+                            }
+                            logLines.add(0, line);
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to read log files: " + e.getMessage());
+        }
+        
+        return logLines;
+    }
+    
+    /**
+     * Displays audit trail viewer with real-time log reading.
+     */
+    public void displayAuditTrailViewer() {
+        System.out.println("\n=======================================================================");
+        System.out.println("                         AUDIT TRAIL VIEWER                           ");
+        System.out.println("=======================================================================");
+        System.out.println();
+        
+        String logDir = Logger.getLogDirectory();
+        Path logPath = Paths.get(logDir);
+        
+        if (!Files.exists(logPath)) {
+            System.out.println("Log directory not found: " + logPath.toAbsolutePath());
+            System.out.println("No log files available to display.");
+            return;
+        }
+        
+        System.out.println("Log Directory: " + logPath.toAbsolutePath());
+        System.out.println();
+        
+        try {
+            List<Path> logFiles = new ArrayList<>();
+            Files.list(logPath)
+                .filter(p -> p.toString().endsWith(".log"))
+                .sorted((a, b) -> {
+                    try {
+                        return Files.getLastModifiedTime(b).compareTo(Files.getLastModifiedTime(a));
+                    } catch (IOException e) {
+                        return 0;
+                    }
+                })
+                .forEach(logFiles::add);
+            
+            if (logFiles.isEmpty()) {
+                System.out.println("No log files found in the logs directory.");
+                System.out.println("Log files are created automatically when operations are performed.");
+                return;
+            }
+            
+            System.out.println("Found " + logFiles.size() + " log file(s):");
+            for (int i = 0; i < logFiles.size(); i++) {
+                Path file = logFiles.get(i);
+                try {
+                    long size = Files.size(file);
+                    System.out.printf("  %d. %s (Size: %d bytes)%n", i + 1, file.getFileName(), size);
+                } catch (IOException e) {
+                    System.out.printf("  %d. %s%n", i + 1, file.getFileName());
+                }
+            }
+            System.out.println();
+            
+            System.out.println("Recent Log Entries (Real-time from log files):");
+            System.out.println("-----------------------------------------------------------------------");
+            
+            List<String> recentLogs = readLogsFromFiles(50, null, null);
+            
+            if (recentLogs.isEmpty()) {
+                System.out.println("No audit log entries found.");
+            } else {
+                System.out.println("Showing last " + recentLogs.size() + " audit entries:");
+                System.out.println();
+                
+                for (String line : recentLogs) {
+                    System.out.println(line);
+                }
+            }
+            
+            System.out.println();
+            System.out.println("Total audit entries displayed: " + recentLogs.size());
+            System.out.println("Log files are updated in real-time as operations are performed.");
+            System.out.println("To view more entries, check the log files directly in: " + logPath.toAbsolutePath());
+            
+        } catch (IOException e) {
+            System.out.println("Error reading log files: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Parses log entry from string.
      */
     private AuditEntry parseEntry(String line) {
-        // Simplified parsing - in production, use JSON or structured format
         try {
-            String[] parts = line.split("\\|");
-            if (parts.length < 6) return null;
+            if (!line.contains("AUDIT:")) {
+                return null;
+            }
             
-            String timestamp = parts[0].substring(1).trim();
-            String threadId = parts[1].split(":")[1].trim();
-            String operationType = parts[2].split(":")[1].trim();
-            String userAction = parts[3].split(":")[1].trim();
-            long executionTime = Long.parseLong(parts[4].split(":")[1].replace("ms", "").trim());
-            boolean success = parts[5].split(":")[1].trim().equals("SUCCESS");
-            String details = parts.length > 6 ? parts[6].trim() : "";
+            String auditPart = line.substring(line.indexOf("AUDIT:"));
+            String[] parts = auditPart.split("\\|");
+            if (parts.length < 5) return null;
+            
+            String operationType = parts[0].replace("AUDIT:", "").trim();
+            String userAction = parts[1].replace("Action:", "").trim();
+            long executionTime = Long.parseLong(parts[2].replace("Time:", "").replace("ms", "").trim());
+            boolean success = parts[3].replace("Status:", "").trim().equals("SUCCESS");
+            String details = parts.length > 4 ? parts[4].trim() : "";
+            
+            String threadId = String.valueOf(Thread.currentThread().threadId());
             
             return new AuditEntry(threadId, operationType, userAction, executionTime, success, details);
         } catch (Exception e) {
@@ -324,30 +365,36 @@ public class AuditTrailService {
         List<AuditEntry> results = new ArrayList<>();
         
         try {
-            File logDir = new File(LOG_DIR);
-            File[] logFiles = logDir.listFiles((dir, name) -> name.startsWith("audit_") && name.endsWith(".log"));
+            String logDir = Logger.getLogDirectory();
+            Path logPath = Paths.get(logDir);
             
-            if (logFiles == null) return results;
-            
-            for (File logFile : logFiles) {
-                try (BufferedReader reader = Files.newBufferedReader(logFile.toPath())) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        AuditEntry entry = parseEntry(line);
-                        if (entry != null) {
-                            // Apply filters
-                            if (operationType != null && !entry.getOperationType().equals(operationType)) {
-                                continue;
-                            }
-                            if (threadId != null && !entry.getThreadId().equals(threadId)) {
-                                continue;
-                            }
-                            // Date range filtering would go here
-                            results.add(entry);
-                        }
-                    }
-                }
+            if (!Files.exists(logPath)) {
+                return results;
             }
+            
+            Files.list(logPath)
+                .filter(p -> p.toString().endsWith(".log"))
+                .forEach(logFile -> {
+                    try (BufferedReader reader = Files.newBufferedReader(logFile)) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (line.contains("AUDIT:")) {
+                                AuditEntry entry = parseEntry(line);
+                                if (entry != null) {
+                                    if (operationType != null && !entry.getOperationType().equals(operationType)) {
+                                        return;
+                                    }
+                                    if (threadId != null && !entry.getThreadId().equals(threadId)) {
+                                        return;
+                                    }
+                                    results.add(entry);
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Failed to read log file: " + e.getMessage());
+                    }
+                });
         } catch (IOException e) {
             System.err.println("Failed to search audit log: " + e.getMessage());
         }

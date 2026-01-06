@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 public class GradeService {
     private final Grade[] grades;
     private int gradeCount;
-    // LinkedList keeps grade history in insertion order with O(1) add/remove at ends for frequent updates.
     private final LinkedList<Grade> gradeHistory = new LinkedList<>();
 
     /**
@@ -26,14 +25,6 @@ public class GradeService {
 
     /**
      * Records a new grade in the system and ensures proper subject enrollment.
-     * This method performs several critical operations:
-     * 1. Validates grade capacity and value range
-     * 2. Stores the grade in the array-based storage
-     * 3. Automatically enrolls the student in the subject if not already enrolled
-     * 4. Creates subject instances dynamically if they don't exist
-     * 
-     * Design Decision: Using array-based storage for O(1) insertion and predictable memory usage.
-     * The grade count acts as both a counter and an index pointer.
      * 
      * @param grade Grade object to record.
      * @param studentService Service for student lookup and subject management.
@@ -42,30 +33,22 @@ public class GradeService {
      * @throws InvalidGradeException if grade value is outside valid range (0-100).
      */
     public boolean recordGrade(Grade grade, StudentService studentService) {
-        // Capacity check: prevent array index out of bounds
         if (gradeCount >= grades.length) {
             throw new AppExceptions("Grade database full!");
         }
         
-        // Range validation: grades must be between 0 and 100 (inclusive)
         if (grade.getValue() < 0 || grade.getValue() > 100) {
             throw new InvalidGradeException(grade.getValue());
         }
         
-        // Store grade in array (O(1)) and append to grade history list (O(1) addLast).
         grades[gradeCount++] = grade;
         gradeHistory.addLast(grade);
 
-        // Ensure the subject is enrolled for the student
-        // This maintains data consistency: grades should only exist for enrolled subjects
         Student student = studentService.findStudentById(grade.getStudentID());
         Subject subject = studentService.findSubjectByNameAndType(grade.getSubjectName(), grade.getSubjectType());
         
         if (student != null) {
-            // If subject doesn't exist in system, create it dynamically
-            // This allows flexible subject creation without pre-registration
             if (subject == null) {
-                // Factory pattern: create appropriate subject type based on classification
                 if (grade.getSubjectType().equalsIgnoreCase("Core Subject")) {
                     subject = new CoreSubject(grade.getSubjectName(), grade.getSubjectType());
                 } else if (grade.getSubjectType().equalsIgnoreCase("Elective Subject")) {
@@ -73,13 +56,10 @@ public class GradeService {
                 }
             }
             
-            // Check if student is already enrolled to avoid duplicate enrollment
-            // Using stream API for concise predicate matching
             boolean alreadyEnrolled = student.getEnrolledSubjects().stream()
                 .anyMatch(s -> s.getSubjectName().equalsIgnoreCase(grade.getSubjectName())
                             && s.getSubjectType().equalsIgnoreCase(grade.getSubjectType()));
             
-            // Only enroll if not already enrolled and subject was successfully created/found
             if (!alreadyEnrolled && subject != null) {
                 student.enrollSubject(subject);
             }
@@ -112,7 +92,6 @@ public class GradeService {
 
     /**
      * Returns a read-only view of the grade history list (in insertion order).
-     * LinkedList iteration is O(n); appends/removals at ends stay O(1).
      */
     public List<Grade> getGradeHistory() {
         return Collections.unmodifiableList(gradeHistory);

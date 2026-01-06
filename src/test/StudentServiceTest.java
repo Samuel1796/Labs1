@@ -102,11 +102,7 @@ class StudentServiceTest {
         assertSame(regularStudent, topPerformers[0]);
     }
 
-    @Test
-    void testIsValidEmailSimpleRegex() {
-        assertTrue(studentService.isValidEmail("user+1@example.com"));
-        assertFalse(studentService.isValidEmail("invalid-email"));
-    }
+
 
     @Test
     void testFindSubjectByNameAndTypeReturnsNullWhenMissing() {

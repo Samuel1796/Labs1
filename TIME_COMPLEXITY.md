@@ -281,7 +281,41 @@ For all pattern-based searches, the high-level structure is:
 
 ---
 
-## 9. Practical Impact & Guidelines
+## 9. Logging & Cache Management
+
+### 9.1 Logger (`utilities.Logger`)
+
+- **Code**: `Logger` class with daily file rotation and performance monitoring
+  - `@Logger.java`
+- **Features**:
+  - Daily log file rotation (one file per day: `app-YYYY-MM-DD.log`)
+  - Thread-safe asynchronous file writing using `BlockingQueue` and `ExecutorService`
+  - Audit trail logging with timestamps and operation details
+  - Performance monitoring with collection sizes and thread pool metrics
+- **Complexity**:
+  - Log entry creation: **O(1)** - adds to queue
+  - File writing: **O(1)** per entry (asynchronous, batched)
+  - Daily rotation: **O(1)** - checks date on each write
+  - Performance logging: **O(1)** - single map operation
+- **Space**: Queue size bounded by system capacity; log files grow linearly with operations
+
+### 9.2 Cache Management (`utilities.CacheUtils`)
+
+- **Code**: `CacheUtils` centralized cache management
+  - `@CacheUtils.java`
+- **Data structures**:
+  - `ConcurrentHashMap<String, LRUCache<?, ?>>` for cache registry
+  - Multiple `LRUCache` instances for statistics, student data, and performance metrics
+- **Complexity**:
+  - Cache retrieval: **O(1)** average (delegates to LRUCache)
+  - Cache creation: **O(1)** - hash map insertion
+  - Statistics retrieval: **O(1)** - hash map lookup
+  - Cache invalidation: **O(1)** - hash map + LRU eviction
+- **Notes**: Provides unified interface for managing multiple cache instances across the application
+
+---
+
+## 10. Practical Impact & Guidelines
 
 - **Small–medium class sizes (tens to low hundreds of students)**:
   - All operations (search, analytics, scheduling) are comfortably fast; even O(n * g) scans are acceptable.
@@ -294,7 +328,8 @@ For all pattern-based searches, the high-level structure is:
 
 - **When extending the system**:
   - Prefer operations that are **O(1)** or **O(log n)** on shared collections (`HashMap`, `ConcurrentHashMap`, `TreeMap`, `PriorityQueue`) for hot paths.
-  - Be explicit about any O(n * g) or O(n²) behavior in comments, as in `StudentService`, to make tradeoffs clear.
-  - Reuse existing utilities (validation, file I/O, scheduler, cache) instead of re-implementing ad-hoc logic in new services.
+  - Use `Logger` for all logging operations to ensure consistent audit trails and performance monitoring.
+  - Use `CacheUtils` for centralized cache management instead of creating ad-hoc caching solutions.
+  - Reuse existing utilities (validation, file I/O, scheduler, cache, logger) instead of re-implementing ad-hoc logic in new services.
 
 
