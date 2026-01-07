@@ -11,27 +11,22 @@ import java.util.*;
 
 import utilities.FileIOUtils;
 import utilities.Logger;
-<<<<<<< HEAD
-=======
 import services.system.AuditTrailService;
 >>>>>>> main
 import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-<<<<<<< HEAD
         Logger.initialize();
         Logger.info("APPLICATION: Starting - Student Grade Management System");
         
         
-=======
         // Initialize Logger first
         Logger.initialize();
         Logger.info("=== Student Grade Management System Started ===");
         Logger.info("Application initialized at: " + new java.util.Date());
         
         // Initialize services
->>>>>>> main
         StudentService studentService = new StudentService();
         GradeService gradeService = new GradeService(500);
         MenuService menuService = new MenuService();
@@ -71,12 +66,10 @@ public class Main {
         services.file.GradeImportExportService gradeImportExportService = new services.file.GradeImportExportService(gradeService);
         BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeImportExportService, format, outputDir, threadCount);
 
-<<<<<<< HEAD
         try {
             while (running) {
                 try {
                     menuService.displayMainMenu();
-=======
         // Add shutdown hook to properly close logger
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Logger.shutdown();
@@ -85,7 +78,6 @@ public class Main {
         
         while (running) {
             menuService.displayMainMenu();
->>>>>>> main
 
                     int choice = sc.nextInt();
                     sc.nextLine();
