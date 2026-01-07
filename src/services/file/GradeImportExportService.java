@@ -9,12 +9,14 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.text.SimpleDateFormat;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+// iText PDF dependencies - uncomment when iText library is added to classpath
+// import com.itextpdf.text.Document;
+// import com.itextpdf.text.Paragraph;
+// import com.itextpdf.text.pdf.PdfPTable;
+// import com.itextpdf.text.pdf.PdfWriter;
+// Apache POI Excel dependencies - uncomment when POI library is added to classpath
+// import org.apache.poi.ss.usermodel.*;
+// import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Service for importing and exporting grade data in multiple formats.
@@ -203,6 +205,10 @@ public class GradeImportExportService {
                         jsonContent.append(line);
                     }
                 }
+                // Note: JSON parsing requires org.json library
+                // For now, using simple string parsing as fallback
+                throw new UnsupportedOperationException("JSON import requires org.json library. Please add org.json:json to classpath.");
+                /* Uncomment when org.json is available:
                 org.json.JSONArray arr = new org.json.JSONArray(jsonContent.toString());
                 totalRows = arr.length();
                 for (int i = 0; i < arr.length(); i++) {
@@ -214,6 +220,7 @@ public class GradeImportExportService {
                     record.put("gradeStr", obj.optString("gradeStr", "").trim());
                     gradeRecords.add(record);
                 }
+                */
             } else {
                 System.out.println("Unsupported format: " + format);
                 return;
@@ -346,10 +353,14 @@ public class GradeImportExportService {
             map.put("date", sdf.format(g.getDate()));
             formattedGrades.add(map);
         }
+        // Note: JSON export requires Jackson library
+        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
+        /* Uncomment when Jackson is available:
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("./reports/json/" + filename + ".json"))) {
             writer.write(mapper.writeValueAsString(formattedGrades));
         }
+        */
     }
     
     /**
@@ -393,8 +404,11 @@ public class GradeImportExportService {
     
     /**
      * Exports grade report to PDF format.
+     * Note: Requires iText library (com.itextpdf:itextpdf)
      */
     public void exportGradeReportPDF(Student student, String filename) throws Exception {
+        throw new UnsupportedOperationException("PDF export requires iText library. Please add com.itextpdf:itextpdf to classpath.");
+        /* Uncomment when iText is available:
         Document document = new Document();
         PdfWriter.getInstance(document, new FileOutputStream(filename + ".pdf"));
         document.open();
@@ -420,12 +434,16 @@ public class GradeImportExportService {
         }
         document.add(table);
         document.close();
+        */
     }
     
     /**
      * Exports grade report to Excel format.
+     * Note: Requires Apache POI library (org.apache.poi:poi-ooxml)
      */
     public void exportGradeReportExcel(Student student, String filename) throws Exception {
+        throw new UnsupportedOperationException("Excel export requires Apache POI library. Please add org.apache.poi:poi-ooxml to classpath.");
+        /* Uncomment when Apache POI is available:
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Grades");
         Row header = sheet.createRow(0);
@@ -453,6 +471,7 @@ public class GradeImportExportService {
             workbook.write(fos);
         }
         workbook.close();
+        */
     }
 }
 

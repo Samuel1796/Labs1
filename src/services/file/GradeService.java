@@ -34,10 +34,8 @@ public class GradeService {
      * @throws InvalidGradeException if grade value is outside valid range (0-100).
      */
     public boolean recordGrade(Grade grade, StudentService studentService) {
-<<<<<<< HEAD
         long startTime = System.currentTimeMillis();
-=======
->>>>>>> main
+
         if (gradeCount >= grades.length) {
             long duration = System.currentTimeMillis() - startTime;
             Logger.logAudit("RECORD_GRADE", "Record grade: " + grade.getGradeID(), duration, false, 

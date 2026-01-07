@@ -253,7 +253,7 @@ public class AuditTrailService {
     }
     
     /**
-     * Displays audit trail viewer with real-time log reading.
+     * Displays audit trail viewer with real-time log reading from both memory and files.
      */
     public void displayAuditTrailViewer() {
         System.out.println("\n=======================================================================");
@@ -261,73 +261,104 @@ public class AuditTrailService {
         System.out.println("=======================================================================");
         System.out.println();
         
-        String logDir = Logger.getLogDirectory();
-        Path logPath = Paths.get(logDir);
+        // First, try to get logs from in-memory storage (fastest, most up-to-date)
+        List<Logger.LogEntry> memoryLogs = Logger.getAllLogs();
+        List<String> auditLogs = new ArrayList<>();
         
-        if (!Files.exists(logPath)) {
-            System.out.println("Log directory not found: " + logPath.toAbsolutePath());
-            System.out.println("No log files available to display.");
+        // Filter for audit entries from memory
+        for (Logger.LogEntry entry : memoryLogs) {
+            if (entry.getMessage().contains("AUDIT:")) {
+                auditLogs.add(entry.toString());
+            }
+        }
+        
+        // If no logs in memory, try reading from files
+        if (auditLogs.isEmpty()) {
+            String logDir = Logger.getLogDirectory();
+            Path logPath = Paths.get(logDir);
+            
+            if (Files.exists(logPath)) {
+                try {
+                    // Force flush any pending writes
+                    if (Logger.getCurrentLogFile() != null) {
+                        // Try to read from files as backup
+                        List<String> fileLogs = readLogsFromFiles(50, null, null);
+                        auditLogs.addAll(fileLogs);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error reading from log files: " + e.getMessage());
+                }
+            }
+        }
+        
+        // Also check the in-memory queue for any pending entries
+        List<AuditEntry> queueEntries = new ArrayList<>();
+        for (AuditEntry entry : logQueue) {
+            queueEntries.add(entry);
+        }
+        
+        // Display results
+        if (auditLogs.isEmpty() && queueEntries.isEmpty()) {
+            System.out.println("No audit log entries found.");
+            System.out.println();
+            System.out.println("Note: Audit logs are created when you perform operations such as:");
+            System.out.println("  - Adding students");
+            System.out.println("  - Recording grades");
+            System.out.println("  - Viewing reports");
+            System.out.println("  - Importing/exporting data");
+            System.out.println();
+            
+            String logDir = Logger.getLogDirectory();
+            Path logPath = Paths.get(logDir);
+            if (Files.exists(logPath)) {
+                System.out.println("Log Directory: " + logPath.toAbsolutePath());
+                try {
+                    List<Path> logFiles = new ArrayList<>();
+                    Files.list(logPath)
+                        .filter(p -> p.toString().endsWith(".log"))
+                        .forEach(logFiles::add);
+                    
+                    if (!logFiles.isEmpty()) {
+                        System.out.println("Found " + logFiles.size() + " log file(s), but no AUDIT entries yet.");
+                    }
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
             return;
         }
         
-        System.out.println("Log Directory: " + logPath.toAbsolutePath());
-        System.out.println();
-        
-        try {
-            List<Path> logFiles = new ArrayList<>();
-            Files.list(logPath)
-                .filter(p -> p.toString().endsWith(".log"))
-                .sorted((a, b) -> {
-                    try {
-                        return Files.getLastModifiedTime(b).compareTo(Files.getLastModifiedTime(a));
-                    } catch (IOException e) {
-                        return 0;
-                    }
-                })
-                .forEach(logFiles::add);
-            
-            if (logFiles.isEmpty()) {
-                System.out.println("No log files found in the logs directory.");
-                System.out.println("Log files are created automatically when operations are performed.");
-                return;
-            }
-            
-            System.out.println("Found " + logFiles.size() + " log file(s):");
-            for (int i = 0; i < logFiles.size(); i++) {
-                Path file = logFiles.get(i);
-                try {
-                    long size = Files.size(file);
-                    System.out.printf("  %d. %s (Size: %d bytes)%n", i + 1, file.getFileName(), size);
-                } catch (IOException e) {
-                    System.out.printf("  %d. %s%n", i + 1, file.getFileName());
-                }
-            }
-            System.out.println();
-            
-            System.out.println("Recent Log Entries (Real-time from log files):");
+        // Display audit entries from memory
+        if (!auditLogs.isEmpty()) {
+            System.out.println("Recent Audit Log Entries (from memory):");
             System.out.println("-----------------------------------------------------------------------");
+            System.out.println();
             
-            List<String> recentLogs = readLogsFromFiles(50, null, null);
+            // Show most recent first (reverse order)
+            int displayCount = Math.min(50, auditLogs.size());
+            int startIndex = Math.max(0, auditLogs.size() - displayCount);
             
-            if (recentLogs.isEmpty()) {
-                System.out.println("No audit log entries found.");
-            } else {
-                System.out.println("Showing last " + recentLogs.size() + " audit entries:");
-                System.out.println();
-                
-                for (String line : recentLogs) {
-                    System.out.println(line);
-                }
+            for (int i = auditLogs.size() - 1; i >= startIndex; i--) {
+                System.out.println(auditLogs.get(i));
             }
             
             System.out.println();
-            System.out.println("Total audit entries displayed: " + recentLogs.size());
-            System.out.println("Log files are updated in real-time as operations are performed.");
-            System.out.println("To view more entries, check the log files directly in: " + logPath.toAbsolutePath());
-            
-        } catch (IOException e) {
-            System.out.println("Error reading log files: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("Total audit entries displayed: " + displayCount);
+        }
+        
+        // Display any pending queue entries
+        if (!queueEntries.isEmpty()) {
+            System.out.println("Pending audit entries (not yet written to file): " + queueEntries.size());
+            for (AuditEntry entry : queueEntries) {
+                System.out.println(entry.toString());
+            }
+            System.out.println();
+        }
+        
+        System.out.println("Log files are updated in real-time as operations are performed.");
+        String logDir = Logger.getLogDirectory();
+        if (logDir != null) {
+            System.out.println("Log directory: " + Paths.get(logDir).toAbsolutePath());
         }
     }
     
@@ -473,4 +504,5 @@ public class AuditTrailService {
         }
     }
 }
+
 

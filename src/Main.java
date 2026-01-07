@@ -5,22 +5,16 @@ import services.file.BatchReportTaskManager;
 import services.menu.MenuService;
 import services.menu.MainMenuHandler;
 import services.analytics.StatisticsService;
-import exceptions.*;
 import java.io.IOException;
 import java.util.*;
 
 import utilities.FileIOUtils;
 import utilities.Logger;
 import services.system.AuditTrailService;
->>>>>>> main
 import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Logger.initialize();
-        Logger.info("APPLICATION: Starting - Student Grade Management System");
-        
-        
         // Initialize Logger first
         Logger.initialize();
         Logger.info("=== Student Grade Management System Started ===");
@@ -33,11 +27,7 @@ public class Main {
         AuditTrailService auditTrailService = new AuditTrailService();
 
         // Initialize sample students and grades
-        Collection<Student> students = studentService.getStudents();
-        Grade[] grades = gradeService.getGrades();
-        int[] studentCountRef = {studentService.getStudentCount()};
         int[] gradeCountRef = {gradeService.getGradeCount()};
-
         gradeService.setGradeCount(gradeCountRef[0]);
 
         StatisticsService statisticsService = new StatisticsService(
@@ -64,21 +54,20 @@ public class Main {
         
         // Note: BatchReportTaskManager requires GradeImportExportService
         services.file.GradeImportExportService gradeImportExportService = new services.file.GradeImportExportService(gradeService);
+        // BatchReportTaskManager initialized for potential batch operations
+        @SuppressWarnings("unused")
         BatchReportTaskManager batchManager = new BatchReportTaskManager(studentList, gradeImportExportService, format, outputDir, threadCount);
 
-        try {
-            while (running) {
-                try {
-                    menuService.displayMainMenu();
         // Add shutdown hook to properly close logger
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Logger.shutdown();
             auditTrailService.shutdown();
         }));
-        
-        while (running) {
-            menuService.displayMainMenu();
 
+        try {
+            while (running) {
+                try {
+                    menuService.displayMainMenu();
                     int choice = sc.nextInt();
                     sc.nextLine();
                     running = menuHandler.handleMenu(choice);

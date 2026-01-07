@@ -10,7 +10,8 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.fasterxml.jackson.databind.ObjectMapper;
+// Jackson dependency - uncomment when Jackson library is added to classpath
+// import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Manages concurrent batch grade report generation using a fixed thread pool,
@@ -244,6 +245,9 @@ public class BatchReportTaskManager {
             formattedGrades.add(map);
         }
         
+        // Note: JSON export requires Jackson library
+        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
+        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(Paths.get(filePath))) {
             writer.write(mapper.writeValueAsString(formattedGrades));
@@ -254,6 +258,7 @@ public class BatchReportTaskManager {
         if (!createdFile.exists()) {
             throw new IOException("File was not created: " + filePath);
         }
+        */
     }
     
     /**

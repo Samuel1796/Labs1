@@ -8,10 +8,7 @@ import java.util.regex.Pattern;
  */
 public class ValidationUtils {
     
-<<<<<<< HEAD
-=======
-    // Compiled regex patterns
->>>>>>> main
+
     
     /** Student ID Pattern: STU followed by exactly 3 digits (e.g., STU001, STU042, STU999) */
     private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^STU\\d{3}$");

@@ -5,14 +5,8 @@ import exceptions.DuplicateStudentException;
 import exceptions.StudentNotFoundException;
 
 import java.util.*;
-
-<<<<<<< HEAD
-import utilities.FileIOUtils;
 import utilities.Logger;
-import java.nio.file.Paths;
 
-=======
->>>>>>> main
 /**
  * Service class for managing student data.
  */

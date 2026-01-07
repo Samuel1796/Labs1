@@ -4,8 +4,9 @@ import models.Grade;
 import models.Student;
 import models.RegularStudent;
 import models.HonorsStudent;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+// Jackson dependencies - uncomment when Jackson library is added to classpath
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.*;
 import java.nio.file.*;
@@ -72,18 +73,25 @@ public class FileIOUtils {
     }
 
     // JSON Export/Import for Grades
+    // Note: Requires Jackson library (com.fasterxml.jackson.core:jackson-databind)
     public static void writeGradesToJSON(Path jsonPath, List<Grade> grades) throws IOException {
+        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
+        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedWriter writer = Files.newBufferedWriter(jsonPath)) {
             writer.write(mapper.writeValueAsString(grades));
         }
+        */
     }
 
     public static List<Grade> readGradesFromJSON(Path jsonPath) throws IOException {
+        throw new UnsupportedOperationException("JSON import requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
+        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedReader reader = Files.newBufferedReader(jsonPath)) {
             return mapper.readValue(reader, new TypeReference<List<Grade>>() {});
         }
+        */
     }
 
     // Binary Serialization for Grades
@@ -118,6 +126,7 @@ public class FileIOUtils {
                     WatchKey key = watchService.take();
                     
                     for (WatchEvent<?> event : key.pollEvents()) {
+                        // Event processed - trigger callback
                         onChange.run();
                     }
                     
@@ -150,7 +159,7 @@ public class FileIOUtils {
                 String[] parts = line.split(",");
                 
                 if (parts.length >= 6) {
-                    String studentID = parts[0].trim();
+                    // studentID parsed but not used directly - student ID is auto-generated
                     String name = parts[1].trim();
                     int age = Integer.parseInt(parts[2].trim());
                     String email = parts[3].trim();
@@ -184,18 +193,25 @@ public class FileIOUtils {
     }
 
     // JSON Export/Import for Students
+    // Note: Requires Jackson library (com.fasterxml.jackson.core:jackson-databind)
     public static void writeStudentsToJSON(Path jsonPath, Collection<Student> students) throws IOException {
+        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
+        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedWriter writer = Files.newBufferedWriter(jsonPath)) {
             writer.write(mapper.writeValueAsString(students));
         }
+        */
     }
 
     public static List<Student> readStudentsFromJSON(Path jsonPath) throws IOException {
+        throw new UnsupportedOperationException("JSON import requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
+        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedReader reader = Files.newBufferedReader(jsonPath)) {
             return mapper.readValue(reader, new TypeReference<List<Student>>() {});
         }
+        */
     }
 
     // Binary Serialization for Students

@@ -12,21 +12,16 @@ import services.file.BatchReportTaskManager;
 import services.analytics.StatisticsService;
 import services.analytics.StatisticsDashboard;
 import services.search.PatternSearchService;
-<<<<<<< HEAD
 import utilities.Logger;
-=======
 import services.system.CacheManagementService;
 import services.system.AuditTrailService;
-import utilities.Logger;
 import utilities.CacheUtils;
->>>>>>> main
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.Scanner;
 
 public class MainMenuHandler {
@@ -616,35 +611,21 @@ System.out.println("ERROR: " + e.getMessage());
                             }
                         }
                     }
-<<<<<<< HEAD
                     if (!foundGPA || gpaStudent == null) {
                         long gpaDuration = System.currentTimeMillis() - gpaStartTime;
-                        Logger.logAudit("CALCULATE_STUDENT_GPA", "Calculate GPA", gpaDuration, false, "Student not found or operation cancelled");
+                        logOperation("CALCULATE_GPA", "Calculate GPA", gpaDuration, false, "Student not found or operation cancelled");
                         break;
                     }
                     statisticsService.printStudentGPAReport(gpaStudent);
                     long gpaDuration = System.currentTimeMillis() - gpaStartTime;
-                    Logger.logAudit("CALCULATE_STUDENT_GPA", "Calculate GPA for " + gpaStudent.getStudentID(), gpaDuration, true, "GPA calculated successfully");
-=======
-                    if (!foundGPA || gpaStudent == null) break;
-                    
-                    long gpaStartTime = System.currentTimeMillis();
-                    statisticsService.printStudentGPAReport(gpaStudent);
-                    long gpaExecutionTime = System.currentTimeMillis() - gpaStartTime;
-                    
-                    logOperation("CALCULATE_GPA", "Calculated GPA for " + gpaStudent.getStudentID(), gpaExecutionTime, true, "Student: " + gpaStudent.getName());
->>>>>>> main
+                    logOperation("CALCULATE_GPA", "Calculate GPA for " + gpaStudent.getStudentID(), gpaDuration, true, "GPA calculated successfully");
                     break;
 
 //                    VIEW CLASS STATS
                 case 9:
-<<<<<<< HEAD
-                    long statsStartTime = System.currentTimeMillis();
-                    Logger.info("VIEW_CLASS_STATISTICS: Starting");
-=======
                     // STATISTICAL ANALYSIS
                     long statsStartTime = System.currentTimeMillis();
->>>>>>> main
+                    Logger.info("VIEW_CLASS_STATISTICS: Starting");
                     StatisticsService statsService = new StatisticsService(
                             gradeService.getGrades(),
                             gradeService.getGradeCount(),
@@ -653,19 +634,10 @@ System.out.println("ERROR: " + e.getMessage());
                             gradeService
                     );
                     statsService.printStatisticsReport();
-<<<<<<< HEAD
-                    long statsDuration = System.currentTimeMillis() - statsStartTime;
-                    Map<String, Object> statsMetrics = new java.util.HashMap<>();
-                    statsMetrics.put("studentCount", studentService.getStudentCount());
-                    statsMetrics.put("gradeCount", gradeService.getGradeCount());
-                    Logger.logPerformance("VIEW_CLASS_STATISTICS", statsDuration, statsMetrics);
-                    Logger.logAudit("VIEW_CLASS_STATISTICS", "View class statistics", statsDuration, true, "Statistics report generated");
-=======
                     long statsExecutionTime = System.currentTimeMillis() - statsStartTime;
                     
                     logOperation("VIEW_STATISTICS", "Viewed class statistics", statsExecutionTime, true, 
                         "Students: " + studentService.getStudentCount() + ", Grades: " + gradeService.getGradeCount());
->>>>>>> main
                     break;
 
 
@@ -1117,64 +1089,7 @@ System.out.println("ERROR: " + e.getMessage());
 
 //                    AUDIT TRAIL VIEWER
                 case 18:
-<<<<<<< HEAD
-                    System.out.println("\n=========================================================================");
-                    System.out.println("                      AUDIT TRAIL VIEWER                                ");
-                    System.out.println("=========================================================================");
-                    System.out.println("1. View All Logs");
-                    System.out.println("2. View Recent Logs (Last 50)");
-                    System.out.println("3. View Error Logs Only");
-                    System.out.println("4. View Warning Logs Only");
-                    System.out.println("5. View Info Logs Only");
-                    System.out.println("6. View Audit Logs Only");
-                    System.out.print("Select option (1-6): ");
-                    
-                    try {
-                        int auditChoice = sc.nextInt();
-                        sc.nextLine();
-                        
-                        List<utilities.Logger.LogEntry> logs = new ArrayList<>();
-                        switch (auditChoice) {
-                            case 1:
-                                logs = utilities.Logger.getAllLogs();
-                                break;
-                            case 2:
-                                logs = utilities.Logger.getRecentLogs(50);
-                                break;
-                            case 3:
-                                logs = utilities.Logger.getLogsByLevel("ERROR");
-                                break;
-                            case 4:
-                                logs = utilities.Logger.getLogsByLevel("WARN");
-                                break;
-                            case 5:
-                                logs = utilities.Logger.getLogsByLevel("INFO");
-                                break;
-                            case 6:
-                                logs = utilities.Logger.getAllLogs();
-                                logs = logs.stream()
-                                    .filter(log -> log.getMessage().contains("AUDIT:"))
-                                    .collect(Collectors.toList());
-                                break;
-                            default:
-                                System.out.println("Invalid option.");
-                                break;
-                        }
-                        
-                        if (auditChoice >= 1 && auditChoice <= 6) {
-                            System.out.println("\nTotal entries: " + logs.size());
-                            System.out.println("=========================================================================");
-                            for (utilities.Logger.LogEntry entry : logs) {
-                                System.out.println(entry.toString());
-                            }
-                            System.out.println("=========================================================================");
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error viewing audit trail: " + e.getMessage());
-                    }
-=======
                     auditTrailService.displayAuditTrailViewer();
->>>>>>> main
                     break;
 
                 case 19:
