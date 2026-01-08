@@ -9,14 +9,14 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.text.SimpleDateFormat;
-// iText PDF dependencies - uncomment when iText library is added to classpath
-// import com.itextpdf.text.Document;
-// import com.itextpdf.text.Paragraph;
-// import com.itextpdf.text.pdf.PdfPTable;
-// import com.itextpdf.text.pdf.PdfWriter;
-// Apache POI Excel dependencies - uncomment when POI library is added to classpath
-// import org.apache.poi.ss.usermodel.*;
-// import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Service for importing and exporting grade data in multiple formats.
@@ -62,39 +62,31 @@ public class GradeImportExportService {
     }
     
     /**
-     * Exports a student's grade report in multiple formats (CSV, JSON, Binary) simultaneously.
+     * Exports a student's grade report in multiple formats (PDF, Text, Excel) simultaneously.
      */
-    public void exportGradeReportMultiFormat(Student student, int reportType, String baseFilename) throws IOException {
-        String[] formats = {"csv", "json", "binary"};
-        String[] extensions = {".csv", ".json", ".dat"};
-        String[] subdirs = {"csv", "json", "binary"};
+    public void exportGradeReportMultiFormat(Student student, int reportType, String baseFilename) throws Exception {
+        String[] formats = {"pdf", "text", "excel"};
+        String[] extensions = {".pdf", ".txt", ".xlsx"};
+        String[] subdirs = {"pdf", "text", "excel"};
     
         for (int i = 0; i < formats.length; i++) {
             String dirPath = baseFilename.substring(0, baseFilename.lastIndexOf('/')) + "/" + subdirs[i];
             File dir = new File(dirPath);
             if (!dir.exists()) dir.mkdirs();
     
-            String filePath = dirPath + "/" + baseFilename.substring(baseFilename.lastIndexOf('/') + 1) + extensions[i];
-    
-            List<Grade> studentGrades = new ArrayList<>();
-            Grade[] grades = gradeService.getGrades();
-            int gradeCount = gradeService.getGradeCount();
-            for (int j = 0; j < gradeCount; j++) {
-                Grade g = grades[j];
-                if (g != null && g.getStudentID().equalsIgnoreCase(student.getStudentID())) {
-                    studentGrades.add(g);
-                }
-            }
+            String filename = baseFilename.substring(baseFilename.lastIndexOf('/') + 1);
+            String fullPath = dirPath + "/" + filename;
     
             switch (formats[i]) {
-                case "csv":
-                    FileIOUtils.writeGradesToCSV(Paths.get(filePath), studentGrades);
+                case "pdf":
+                    exportGradeReportPDF(student, fullPath);
                     break;
-                case "json":
-                    FileIOUtils.writeGradesToJSON(Paths.get(filePath), studentGrades);
+                case "text":
+                    // Use option 3 for transcript format (detailed report)
+                    exportGradeReport(student, 3, fullPath);
                     break;
-                case "binary":
-                    FileIOUtils.writeGradesToBinary(Paths.get(filePath), studentGrades);
+                case "excel":
+                    exportGradeReportExcel(student, fullPath);
                     break;
             }
         }
@@ -104,11 +96,23 @@ public class GradeImportExportService {
      * Exports a student's grade report to a text file.
      */
     public String exportGradeReport(Student student, int option, String filename) throws IOException {
-        File reportsDir = new File("./reports");
-        if (!reportsDir.exists()) {
-            reportsDir.mkdir();
+        // If filename doesn't contain path, use default directory
+        String filePath;
+        if (filename.contains("/") || filename.contains("\\")) {
+            // Full path provided
+            filePath = filename + ".txt";
+            java.io.File parentDir = new java.io.File(filePath).getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+        } else {
+            // Just filename, use default directory
+            File reportsDir = new File("./reports");
+            if (!reportsDir.exists()) {
+                reportsDir.mkdir();
+            }
+            filePath = "./reports/" + filename + ".txt";
         }
-        String filePath = "./reports/" + filename + ".txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             if (option == 1 || option == 3) {
                 writer.write("GRADE REPORT SUMMARY\n");
@@ -198,29 +202,19 @@ public class GradeImportExportService {
                     }
                 }
             } else if (format.equalsIgnoreCase("json")) {
-                StringBuilder jsonContent = new StringBuilder();
+                ObjectMapper mapper = new ObjectMapper();
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        jsonContent.append(line);
+                    List<Map<String, Object>> jsonArray = mapper.readValue(br, new TypeReference<List<Map<String, Object>>>() {});
+                    totalRows = jsonArray.size();
+                    for (Map<String, Object> obj : jsonArray) {
+                        Map<String, String> record = new HashMap<>();
+                        record.put("studentId", String.valueOf(obj.getOrDefault("studentId", "")).trim());
+                        record.put("subjectName", String.valueOf(obj.getOrDefault("subjectName", "")).trim());
+                        record.put("subjectType", String.valueOf(obj.getOrDefault("subjectType", "")).trim());
+                        record.put("gradeStr", String.valueOf(obj.getOrDefault("gradeStr", "")).trim());
+                        gradeRecords.add(record);
                     }
                 }
-                // Note: JSON parsing requires org.json library
-                // For now, using simple string parsing as fallback
-                throw new UnsupportedOperationException("JSON import requires org.json library. Please add org.json:json to classpath.");
-                /* Uncomment when org.json is available:
-                org.json.JSONArray arr = new org.json.JSONArray(jsonContent.toString());
-                totalRows = arr.length();
-                for (int i = 0; i < arr.length(); i++) {
-                    org.json.JSONObject obj = arr.getJSONObject(i);
-                    Map<String, String> record = new HashMap<>();
-                    record.put("studentId", obj.optString("studentId", "").trim());
-                    record.put("subjectName", obj.optString("subjectName", "").trim());
-                    record.put("subjectType", obj.optString("subjectType", "").trim());
-                    record.put("gradeStr", obj.optString("gradeStr", "").trim());
-                    gradeRecords.add(record);
-                }
-                */
             } else {
                 System.out.println("Unsupported format: " + format);
                 return;
@@ -353,14 +347,14 @@ public class GradeImportExportService {
             map.put("date", sdf.format(g.getDate()));
             formattedGrades.add(map);
         }
-        // Note: JSON export requires Jackson library
-        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
-        /* Uncomment when Jackson is available:
-        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("./reports/json/" + filename + ".json"))) {
-            writer.write(mapper.writeValueAsString(formattedGrades));
+        ObjectMapper mapper = new ObjectMapper();
+        java.io.File jsonDir = new java.io.File("./reports/json");
+        if (!jsonDir.exists()) {
+            jsonDir.mkdirs();
         }
-        */
+        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(java.nio.file.Paths.get("./reports/json/" + filename + ".json"))) {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(writer, formattedGrades);
+        }
     }
     
     /**
@@ -404,15 +398,32 @@ public class GradeImportExportService {
     
     /**
      * Exports grade report to PDF format.
-     * Note: Requires iText library (com.itextpdf:itextpdf)
      */
     public void exportGradeReportPDF(Student student, String filename) throws Exception {
-        throw new UnsupportedOperationException("PDF export requires iText library. Please add com.itextpdf:itextpdf to classpath.");
-        /* Uncomment when iText is available:
+        // If filename doesn't contain path, use default directory
+        String filePath;
+        if (filename.contains("/") || filename.contains("\\")) {
+            // Full path provided
+            filePath = filename + ".pdf";
+            java.io.File parentDir = new java.io.File(filePath).getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+        } else {
+            // Just filename, use default directory
+            java.io.File pdfDir = new java.io.File("./reports/pdf");
+            if (!pdfDir.exists()) {
+                pdfDir.mkdirs();
+            }
+            filePath = "./reports/pdf/" + filename + ".pdf";
+        }
         Document document = new Document();
-        PdfWriter.getInstance(document, new FileOutputStream(filename + ".pdf"));
+        PdfWriter.getInstance(document, new FileOutputStream(filePath));
         document.open();
         document.add(new Paragraph("Grade Report for " + student.getName()));
+        document.add(new Paragraph("Student ID: " + student.getStudentID()));
+        document.add(new Paragraph("Type: " + ((student instanceof HonorsStudent) ? "Honors Student" : "Regular Student")));
+        document.add(new Paragraph(" "));
         PdfPTable table = new PdfPTable(5);
         table.addCell("Grade ID");
         table.addCell("Subject");
@@ -433,25 +444,53 @@ public class GradeImportExportService {
             }
         }
         document.add(table);
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph("Average: " + String.format("%.1f", student.calculateAverage(gradeService)) + "%"));
+        document.add(new Paragraph("Status: " + (student.isPassing(gradeService) ? "PASSING" : "FAILING")));
         document.close();
-        */
     }
     
     /**
      * Exports grade report to Excel format.
-     * Note: Requires Apache POI library (org.apache.poi:poi-ooxml)
      */
     public void exportGradeReportExcel(Student student, String filename) throws Exception {
-        throw new UnsupportedOperationException("Excel export requires Apache POI library. Please add org.apache.poi:poi-ooxml to classpath.");
-        /* Uncomment when Apache POI is available:
+        // If filename doesn't contain path, use default directory
+        String filePath;
+        if (filename.contains("/") || filename.contains("\\")) {
+            // Full path provided
+            filePath = filename + ".xlsx";
+            java.io.File parentDir = new java.io.File(filePath).getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+        } else {
+            // Just filename, use default directory
+            java.io.File excelDir = new java.io.File("./reports/excel");
+            if (!excelDir.exists()) {
+                excelDir.mkdirs();
+            }
+            filePath = "./reports/excel/" + filename + ".xlsx";
+        }
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Grades");
+        
+        // Header row
         Row header = sheet.createRow(0);
         header.createCell(0).setCellValue("Grade ID");
         header.createCell(1).setCellValue("Subject");
         header.createCell(2).setCellValue("Type");
         header.createCell(3).setCellValue("Value");
         header.createCell(4).setCellValue("Date");
+        
+        // Style header row
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        for (int i = 0; i < 5; i++) {
+            header.getCell(i).setCellStyle(headerStyle);
+        }
+        
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
         Grade[] grades = gradeService.getGrades();
         int gradeCount = gradeService.getGradeCount();
@@ -467,11 +506,25 @@ public class GradeImportExportService {
                 row.createCell(4).setCellValue(sdf.format(g.getDate()));
             }
         }
-        try (FileOutputStream fos = new FileOutputStream(filename + ".xlsx")) {
+        
+        // Add summary row
+        int summaryRowIdx = rowIdx + 1;
+        Row summaryRow = sheet.createRow(summaryRowIdx);
+        summaryRow.createCell(0).setCellValue("Average:");
+        summaryRow.createCell(1).setCellValue(String.format("%.1f", student.calculateAverage(gradeService)) + "%");
+        summaryRow = sheet.createRow(summaryRowIdx + 1);
+        summaryRow.createCell(0).setCellValue("Status:");
+        summaryRow.createCell(1).setCellValue(student.isPassing(gradeService) ? "PASSING" : "FAILING");
+        
+        // Auto-size columns
+        for (int i = 0; i < 5; i++) {
+            sheet.autoSizeColumn(i);
+        }
+        
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
             workbook.write(fos);
         }
         workbook.close();
-        */
     }
 }
 

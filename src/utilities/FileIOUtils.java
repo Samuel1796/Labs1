@@ -1,12 +1,14 @@
 package utilities;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Grade;
 import models.Student;
 import models.RegularStudent;
 import models.HonorsStudent;
-// Jackson dependencies - uncomment when Jackson library is added to classpath
-// import com.fasterxml.jackson.databind.ObjectMapper;
-// import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.*;
 import java.nio.file.*;
@@ -73,25 +75,20 @@ public class FileIOUtils {
     }
 
     // JSON Export/Import for Grades
-    // Note: Requires Jackson library (com.fasterxml.jackson.core:jackson-databind)
     public static void writeGradesToJSON(Path jsonPath, List<Grade> grades) throws IOException {
-        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
-        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedWriter writer = Files.newBufferedWriter(jsonPath)) {
-            writer.write(mapper.writeValueAsString(grades));
+            mapper.writerWithDefaultPrettyPrinter().writeValue(writer, grades);
         }
-        */
     }
 
     public static List<Grade> readGradesFromJSON(Path jsonPath) throws IOException {
-        throw new UnsupportedOperationException("JSON import requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
-        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
+        TypeFactory typeFactory = mapper.getTypeFactory();
+        CollectionType collectionType = typeFactory.constructCollectionType(List.class, Grade.class);
         try (BufferedReader reader = Files.newBufferedReader(jsonPath)) {
-            return mapper.readValue(reader, new TypeReference<List<Grade>>() {});
+            return mapper.readValue(reader, collectionType);
         }
-        */
     }
 
     // Binary Serialization for Grades
@@ -193,25 +190,50 @@ public class FileIOUtils {
     }
 
     // JSON Export/Import for Students
-    // Note: Requires Jackson library (com.fasterxml.jackson.core:jackson-databind)
     public static void writeStudentsToJSON(Path jsonPath, Collection<Student> students) throws IOException {
-        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
-        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedWriter writer = Files.newBufferedWriter(jsonPath)) {
-            writer.write(mapper.writeValueAsString(students));
+            mapper.writerWithDefaultPrettyPrinter().writeValue(writer, students);
         }
-        */
     }
 
     public static List<Student> readStudentsFromJSON(Path jsonPath) throws IOException {
-        throw new UnsupportedOperationException("JSON import requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
-        /* Uncomment when Jackson is available:
         ObjectMapper mapper = new ObjectMapper();
         try (BufferedReader reader = Files.newBufferedReader(jsonPath)) {
-            return mapper.readValue(reader, new TypeReference<List<Student>>() {});
+            JsonNode rootNode = mapper.readTree(reader);
+            List<Student> students = new ArrayList<>();
+            
+            if (rootNode.isArray()) {
+                for (JsonNode node : rootNode) {
+                    Student student = deserializeStudent(node, mapper);
+                    if (student != null) {
+                        students.add(student);
+                    }
+                }
+            }
+            return students;
         }
-        */
+    }
+    
+    /**
+     * Helper method to deserialize a Student from JSON, determining the correct type
+     * (RegularStudent or HonorsStudent) based on the passingGrade field.
+     */
+    private static Student deserializeStudent(JsonNode node, ObjectMapper mapper) throws IOException {
+        try {
+            // Check passingGrade to determine student type
+            // RegularStudent has passingGrade = 50, HonorsStudent has passingGrade = 60
+            JsonNode passingGradeNode = node.get("passingGrade");
+            int passingGrade = passingGradeNode != null ? passingGradeNode.asInt() : 50;
+            
+            if (passingGrade == 60) {
+                return mapper.treeToValue(node, HonorsStudent.class);
+            } else {
+                return mapper.treeToValue(node, RegularStudent.class);
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to deserialize student: " + e.getMessage(), e);
+        }
     }
 
     // Binary Serialization for Students

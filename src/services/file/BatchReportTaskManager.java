@@ -10,8 +10,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-// Jackson dependency - uncomment when Jackson library is added to classpath
-// import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Manages concurrent batch grade report generation using a fixed thread pool,
@@ -83,24 +82,24 @@ public class BatchReportTaskManager {
                     // Format-specific export logic
                     // Each format generates different file structures
                     switch (format) {
-                        case 1: // CSV format: single file
-                            String csvPath = baseFilename + ".csv";
-                            exportStudentReportCSV(student, csvPath);
-                            generatedFiles.add(csvPath);
+                        case 1: // PDF summary format: single file
+                            String pdfPath = baseFilename + ".pdf";
+                            exportStudentReportPDF(student, pdfPath);
+                            generatedFiles.add(pdfPath);
                             break;
-                        case 2: // JSON format: single file
-                            String jsonPath = baseFilename + ".json";
-                            exportStudentReportJSON(student, jsonPath);
-                            generatedFiles.add(jsonPath);
+                        case 2: // Detailed Text format: single file
+                            String textPath = baseFilename + ".txt";
+                            exportStudentReportText(student, textPath);
+                            generatedFiles.add(textPath);
                             break;
-                        case 3: // Binary format: single file
-                            String binPath = baseFilename + ".dat";
-                            exportStudentReportBinary(student, binPath);
-                            generatedFiles.add(binPath);
+                        case 3: // Excel Spreadsheet format: single file
+                            String excelPath = baseFilename + ".xlsx";
+                            exportStudentReportExcel(student, excelPath);
+                            generatedFiles.add(excelPath);
                             break;
                         case 4: // All formats: generates files in subdirectories
-                            String[] subdirs = {"csv", "json", "binary"};
-                            String[] extensions = {".csv", ".json", ".dat"};
+                            String[] subdirs = {"pdf", "text", "excel"};
+                            String[] extensions = {".pdf", ".txt", ".xlsx"};
                             // Track expected file paths for verification
                             for (int i = 0; i < subdirs.length; i++) {
                                 String dirPath = outputDir + "/" + subdirs[i];
@@ -115,15 +114,18 @@ public class BatchReportTaskManager {
                     
                     // File existence verification: handle async file system operations
                     // Some file systems may delay file visibility after write completion
-                    // Polling ensures we detect files even if there's a slight delay
+                    // Use a shorter, more efficient polling mechanism
                     boolean allExist = true;
                     for (String filePath : generatedFiles) {
                         java.io.File f = new java.io.File(filePath);
-                        int waitCount = 0;
-                        // Poll up to 5 seconds (50 * 100ms) for file to appear
-                        while (!f.exists() && waitCount < 50) {
-                            Thread.sleep(100); // Sleep 100ms between checks
-                            waitCount++;
+                        // Quick check first - most files appear immediately
+                        if (!f.exists()) {
+                            // If not immediately available, do a few quick checks with shorter delays
+                            int waitCount = 0;
+                            while (!f.exists() && waitCount < 10) {
+                                Thread.sleep(10); // Reduced to 10ms for faster polling
+                                waitCount++;
+                            }
                         }
                         if (!f.exists()) {
                             allExist = false;
@@ -191,9 +193,9 @@ public class BatchReportTaskManager {
     }
     
     /**
-     * Exports a single student's grades to CSV format.
+     * Exports a single student's grade report to PDF summary format.
      */
-    private void exportStudentReportCSV(Student student, String filePath) throws IOException {
+    private void exportStudentReportPDF(Student student, String filePath) throws Exception {
         // Ensure directory exists
         File file = new File(filePath);
         File parentDir = file.getParentFile();
@@ -201,28 +203,23 @@ public class BatchReportTaskManager {
             parentDir.mkdirs();
         }
         
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        List<Grade> studentGrades = getStudentGrades(student);
+        // Extract filename without extension and path for the service method
+        java.nio.file.Path path = Paths.get(filePath);
+        String filename = path.getFileName().toString();
+        if (filename.contains(".")) {
+            filename = filename.substring(0, filename.lastIndexOf('.'));
+        }
+        String dirPath = path.getParent() != null ? path.getParent().toString() : ".";
+        String fullPath = dirPath.replace("\\", "/") + "/" + filename;
         
-        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(Paths.get(filePath))) {
-            writer.write("gradeID,studentID,subjectName,subjectType,value,date\n");
-            for (Grade g : studentGrades) {
-                writer.write(String.format("%s,%s,%s,%s,%.1f,%s\n",
-                    g.getGradeID(), g.getStudentID(), g.getSubjectName(),
-                    g.getSubjectType(), g.getValue(), sdf.format(g.getDate())));
-            }
-            writer.flush(); // Ensure data is written immediately
-        }
-        // Verify file was created
-        if (!new File(filePath).exists()) {
-            throw new IOException("File was not created: " + filePath);
-        }
+        gradeImportExportService.exportGradeReportPDF(student, fullPath);
+        // File is created synchronously, no need to verify immediately
     }
     
     /**
-     * Exports a single student's grades to JSON format.
+     * Exports a single student's grade report to Detailed Text format.
      */
-    private void exportStudentReportJSON(Student student, String filePath) throws IOException {
+    private void exportStudentReportText(Student student, String filePath) throws IOException {
         // Ensure directory exists
         File file = new File(filePath);
         File parentDir = file.getParentFile();
@@ -230,41 +227,24 @@ public class BatchReportTaskManager {
             parentDir.mkdirs();
         }
         
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        List<Grade> studentGrades = getStudentGrades(student);
-        List<Map<String, Object>> formattedGrades = new ArrayList<>();
+        // Extract filename without extension and path for the service method
+        java.nio.file.Path path = Paths.get(filePath);
+        String filename = path.getFileName().toString();
+        if (filename.contains(".")) {
+            filename = filename.substring(0, filename.lastIndexOf('.'));
+        }
+        String dirPath = path.getParent() != null ? path.getParent().toString() : ".";
+        String fullPath = dirPath.replace("\\", "/") + "/" + filename;
         
-        for (Grade g : studentGrades) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("gradeID", g.getGradeID());
-            map.put("studentID", g.getStudentID());
-            map.put("subjectName", g.getSubjectName());
-            map.put("subjectType", g.getSubjectType());
-            map.put("value", g.getValue());
-            map.put("date", sdf.format(g.getDate()));
-            formattedGrades.add(map);
-        }
-        
-        // Note: JSON export requires Jackson library
-        throw new UnsupportedOperationException("JSON export requires Jackson library. Please add com.fasterxml.jackson.core:jackson-databind to classpath.");
-        /* Uncomment when Jackson is available:
-        ObjectMapper mapper = new ObjectMapper();
-        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(Paths.get(filePath))) {
-            writer.write(mapper.writeValueAsString(formattedGrades));
-            writer.flush(); // Ensure data is written immediately
-        }
-        // Verify file was created
-        File createdFile = new File(filePath);
-        if (!createdFile.exists()) {
-            throw new IOException("File was not created: " + filePath);
-        }
-        */
+        // Use option 3 for transcript format (detailed report)
+        gradeImportExportService.exportGradeReport(student, 3, fullPath);
+        // File is created synchronously, no need to verify immediately
     }
     
     /**
-     * Exports a single student's grades to Binary format.
+     * Exports a single student's grade report to Excel Spreadsheet format.
      */
-    private void exportStudentReportBinary(Student student, String filePath) throws IOException {
+    private void exportStudentReportExcel(Student student, String filePath) throws Exception {
         // Ensure directory exists
         File file = new File(filePath);
         File parentDir = file.getParentFile();
@@ -272,14 +252,17 @@ public class BatchReportTaskManager {
             parentDir.mkdirs();
         }
         
-        List<Grade> studentGrades = getStudentGrades(student);
-        FileIOUtils.writeGradesToBinary(Paths.get(filePath), studentGrades);
-        
-        // Verify file was created
-        File createdFile = new File(filePath);
-        if (!createdFile.exists()) {
-            throw new IOException("File was not created: " + filePath);
+        // Extract filename without extension and path for the service method
+        java.nio.file.Path path = Paths.get(filePath);
+        String filename = path.getFileName().toString();
+        if (filename.contains(".")) {
+            filename = filename.substring(0, filename.lastIndexOf('.'));
         }
+        String dirPath = path.getParent() != null ? path.getParent().toString() : ".";
+        String fullPath = dirPath.replace("\\", "/") + "/" + filename;
+        
+        gradeImportExportService.exportGradeReportExcel(student, fullPath);
+        // File is created synchronously, no need to verify immediately
     }
     
     /**
@@ -383,9 +366,9 @@ public class BatchReportTaskManager {
         System.out.println("===TIME STATISTICS========================================================");
         System.out.printf("│ Total Time: %-52.1f seconds │%n", elapsed);
         System.out.printf("│ Avg Time per Report: %-42.0fms │%n", avgTime);
-        System.out.printf("│ Sequential Processing (estimated): %-30.1f seconds │%n", estimatedSequential);
-        System.out.printf("│ Concurrent Processing (actual): %-33.1f seconds │%n", elapsed);
-        System.out.printf("│ Performance Gain: %-47.1fx faster │%n", performanceGain);
+//        System.out.printf("│ Sequential Processing (estimated): %-30.1f seconds │%n", estimatedSequential);
+//        System.out.printf("│ Concurrent Processing (actual): %-33.1f seconds │%n", elapsed);
+//        System.out.printf("│ Performance Gain: %-47.1fx faster │%n", performanceGain);
         System.out.println("==========================================================================");
         System.out.println();
         
